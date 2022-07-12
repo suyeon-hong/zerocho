@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>숫자야구</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			input:focus {
+				outline: none;
+			}
+
+			main {
+				width: 400px;
+				margin: 50px auto 0;
+			}
+			h1 {
+				font-size: 24px;
+				margin-bottom: 20px;
+			}
+
+			.notice {
+				padding-left: 20px;
+				margin-bottom: 30px;
+			}
+			.notice li {
+				font-size: 14px;
+				line-height: 1.25;
+				color: #555;
+			}
+
+			.result {
+				font-size: 15px;
+				font-weight: bold;
+				color: tomato;
+				margin-bottom: 10px;
+			}
+			.result span {
+				display: inline-block;
+				min-width: 20px;
+			}
+
+			.userForm {
+				width: 100%;
+				display: flex;
+				gap: 10px;
+			}
+			.userForm input {
+				width: calc(100% - 130px);
+				height: 50px;
+				padding: 0 10px;
+				font-size: 20px;
+				line-height: 50px;
+			}
+			input::-webkit-inner-spin-button {
+				appearance: none;
+				-moz-appearance: none;
+				-webkit-appearance: none;
+			}
+			.userForm button {
+				width: 120px;
+				height: 50px;
+				font-size: 20px;
+				line-height: 50px;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>숫자야구</h1>
+
+			<ol class="notice">
+				<li>4개의 서로 다른 숫자를 맞추세요.</li>
+				<li>숫자, 위치가 모두 일치한 경우 스트라이크</li>
+				<li>위치는 다르지만 숫자만 일치한 경우 볼</li>
+				<li>스트라이크 4개가 되면 성공입니다.</li>
+			</ol>
+
+			<p class="result">
+				스트라이크: <span id="strike"></span> 볼: <span id="ball"></span>
+			</p>
+			<form action="/" class="userForm">
+				<input type="number" id="userInput" />
+				<button type="submit" id="btnSubmit">도전</button>
+			</form>
+		</main>
+	</body>
+</html>
