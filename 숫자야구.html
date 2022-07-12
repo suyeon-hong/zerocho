@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>숫자야구</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			input:focus {
+				outline: none;
+			}
+
+			main {
+				width: 400px;
+				margin: 50px auto 0;
+			}
+			h1 {
+				font-size: 24px;
+				margin-bottom: 20px;
+			}
+
+			.notice {
+				padding-left: 20px;
+				margin-bottom: 30px;
+			}
+			.notice li {
+				font-size: 14px;
+				line-height: 1.25;
+				color: #555;
+			}
+
+			.result {
+				font-size: 15px;
+				font-weight: bold;
+				color: tomato;
+				margin-bottom: 10px;
+			}
+			.result span {
+				display: inline-block;
+				min-width: 20px;
+			}
+
+			.userForm {
+				width: 100%;
+				display: flex;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+			.userForm input {
+				width: calc(100% - 130px);
+				height: 50px;
+				padding: 0 10px;
+				font-size: 20px;
+				line-height: 50px;
+			}
+			input::-webkit-inner-spin-button {
+				appearance: none;
+				-moz-appearance: none;
+				-webkit-appearance: none;
+			}
+			.userForm button {
+				width: 120px;
+				height: 50px;
+				font-size: 20px;
+				line-height: 50px;
+				cursor: pointer;
+			}
+
+			#complete {
+				font-size: 18px;
+				font-weight: bold;
+				color: darkgreen;
+				display: none;
+				justify-content: center;
+				align-items: center;
+				gap: 20px;
+			}
+			#complete.isOn {
+				display: flex;
+			}
+			#complete button {
+				width: 120px;
+				height: 40px;
+				font-size: 20px;
+				font-weight: bold;
+				color: inherit;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>숫자야구</h1>
+
+			<ol class="notice">
+				<li>4개의 서로 다른 숫자를 맞추세요.</li>
+				<li>숫자, 위치가 모두 일치한 경우 스트라이크</li>
+				<li>위치는 다르지만 숫자만 일치한 경우 볼</li>
+				<li>스트라이크 4개가 되면 성공입니다.</li>
+			</ol>
+
+			<p class="result">
+				입력값: <span id="prevInput"></span> 스트라이크:
+				<span id="strike"></span> 볼: <span id="ball"></span>
+			</p>
+			<form action="/" class="userForm">
+				<input type="number" id="userInput" />
+				<button type="submit" id="btnSubmit">도전</button>
+			</form>
+
+			<p id="complete">
+				성공! 🎉
+				<button>다시 하기</button>
+			</p>
+		</main>
+
+		<script>
+			const strikeEl = document.querySelector("#strike");
+			const ballEl = document.querySelector("#ball");
+			const userInput = document.querySelector("#userInput");
+			const btnSubmit = document.querySelector("#btnSubmit");
+			const prevInput = document.querySelector("#prevInput");
+			const completeEl = document.querySelector("#complete");
+			const btnRestart = document.querySelector("#complete button");
+
+			const numberArr = getRandomNum(4);
+			console.log(numberArr);
+
+			let strike, ball;
+
+			// 랜덤 숫자 배열 생성
+			function getRandomNum(len) {
+				const numArr = [];
+				for (let i = 0; i < len; i++) {
+					const randomNum = parseInt(Math.random() * 10);
+
+					if (numArr.indexOf(randomNum) >= 0) {
+						i--;
+					} else {
+						numArr.push(randomNum);
+					}
+				}
+
+				return numArr;
+			}
+
+			userInput.addEventListener("input", (e) => {
+				const value = e.target.value;
+
+				if (value.length > 4) {
+					userInput.value = value.slice(0, 4);
+				}
+			});
+
+			btnSubmit.addEventListener("click", (e) => {
+				e.preventDefault();
+				const value = userInput.value;
+
+				if (value === "" || strike === 4) {
+					return;
+				}
+
+				strike = 0;
+				ball = 0;
+
+				numberArr.map((num, idx) => {
+					if (num === +value[idx]) {
+						strike += 1;
+					} else {
+						numberArr.indexOf(+value[idx]) >= 0 && (ball += 1);
+					}
+				});
+
+				strikeEl.textContent = strike;
+				ballEl.textContent = ball;
+				prevInput.textContent = value;
+				userInput.value = "";
+				userInput.focus();
+
+				if (strike === 4) {
+					completeEl.classList.add("isOn");
+				}
+			});
+
+			btnRestart.addEventListener("click", () => {
+				location.reload();
+			});
+		</script>
+	</body>
+</html>
