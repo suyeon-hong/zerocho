@@ -70,15 +70,26 @@
 				text-align: center;
 				line-height: 38px;
 			}
+			.endtalk__field li:last-child {
+				border: 2px solid #222;
+			}
 
 			.endtalk__userInput {
 				display: none;
 				width: 100%;
 				margin-bottom: 20px;
-				gap: 20px;
 			}
 			.play .endtalk__userInput {
+				display: block;
+			}
+			.endtalk__userInput > div {
 				display: flex;
+				gap: 20px;
+			}
+			.endtalk__userInput label {
+				display: block;
+				margin-bottom: 10px;
+				font-size: 18px;
 			}
 			.endtalk__userInput input {
 				width: calc(100% - 220px);
@@ -113,13 +124,16 @@
 			<ul class="endtalk__field"></ul>
 
 			<form class="endtalk__userInput">
-				<input type="text" />
-				<button type="submit" class="endtalk__btn__submit">보내기</button>
+				<label for="userInput"><span id="userNum">1</span>번째 참가자</label>
+				<div>
+					<input type="text" id="userInput" />
+					<button type="submit" class="endtalk__btn__submit">보내기</button>
+				</div>
 			</form>
 
 			<ol class="endtalk__notice">
-				<li>시작 버튼을 눌러 게임을 시작해 주세요.</li>
-				<li>2글자 이상 5글자 이하의 한글 단어만 입력 가능합니다.</li>
+				<li>게임 시작하기 버튼을 눌러 게임을 시작해 주세요.</li>
+				<li>3글자 한글 단어만 입력 가능합니다.</li>
 				<li>중복된 단어는 입력이 불가합니다.</li>
 				<li>앞에 입력된 단어의 끝 글자를 첫 글자로 사용해 주세요.</li>
 			</ol>
@@ -129,14 +143,23 @@
 			const main = document.querySelector("main");
 			const btnStart = main.querySelector(".endtalk__btn__gameStart");
 			const btnSubmit = main.querySelector(".endtalk__btn__submit");
-			const userInput = main.querySelector(".endtalk__userInput input");
+			const userInput = main.querySelector("#userInput");
+			const userNumEl = main.querySelector("#userNum");
 			const field = main.querySelector(".endtalk__field");
 
 			const wordList = [];
+			let playerNum = null;
+			let userNum = 1;
 
 			// 게임시작 버튼 클릭
 			btnStart.addEventListener("click", () => {
-				main.classList.add("play");
+				playerNum = Number(
+					prompt("몇 명의 참가자가 참여하나요? (숫자만 입력해 주세요)")
+				);
+
+				if (playerNum) {
+					main.classList.add("play");
+				}
 			});
 
 			// 단어 입력
@@ -164,9 +187,9 @@
 				const regex = /^[ㄱ-ㅎ|가-힣]+$/;
 				const isKr = regex.test(value);
 
-				// 2~5글자 이내인지 확인
+				// 3글자인지 확인
 				const len = value.length;
-				const isLen = len >= 2 && len <= 5;
+				const isLen = len === 3;
 
 				// 이전 단어가 있는지 확인
 				const wordListLen = wordList.length > 0;
@@ -182,8 +205,6 @@
 
 					//  이전 단어 중에 중복된 단어가 있는지 확인
 					isNew = wordList.indexOf(value) < 0;
-					console.log(wordCheck, "word");
-					console.log(isNew, "new");
 				}
 
 				if (!isKr || !isLen || !wordCheck || !isNew) {
@@ -197,6 +218,14 @@
 				// 필드에 단어 추가
 				wordList.push(value);
 				makeItem();
+
+				// 참여자 순서 체크
+				if (userNum === playerNum) {
+					userNum = 1;
+				} else {
+					userNum += 1;
+				}
+				userNumEl.textContent = userNum;
 			}
 		</script>
 	</body>
