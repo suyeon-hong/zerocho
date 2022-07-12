@@ -35,15 +35,26 @@
 				color: #555;
 			}
 
-			.result {
-				font-size: 15px;
+			#complete {
+				font-size: 18px;
 				font-weight: bold;
-				color: tomato;
+				color: darkgreen;
+				display: none;
+				justify-content: center;
+				align-items: center;
+				gap: 20px;
 				margin-bottom: 10px;
 			}
-			.result span {
-				display: inline-block;
-				min-width: 20px;
+			#complete.isOn {
+				display: flex;
+			}
+			#complete button {
+				width: 120px;
+				height: 40px;
+				font-size: 20px;
+				font-weight: bold;
+				color: inherit;
+				cursor: pointer;
 			}
 
 			.userForm {
@@ -72,25 +83,16 @@
 				cursor: pointer;
 			}
 
-			#complete {
-				font-size: 18px;
+			.result {
+				font-size: 15px;
 				font-weight: bold;
-				color: darkgreen;
-				display: none;
-				justify-content: center;
-				align-items: center;
-				gap: 20px;
-			}
-			#complete.isOn {
+				color: tomato;
 				display: flex;
+				flex-direction: column-reverse;
 			}
-			#complete button {
-				width: 120px;
-				height: 40px;
-				font-size: 20px;
-				font-weight: bold;
-				color: inherit;
-				cursor: pointer;
+			.result span {
+				display: inline-block;
+				min-width: 20px;
 			}
 		</style>
 	</head>
@@ -102,27 +104,28 @@
 				<li>4개의 서로 다른 숫자를 맞추세요.</li>
 				<li>숫자, 위치가 모두 일치한 경우 스트라이크</li>
 				<li>위치는 다르지만 숫자만 일치한 경우 볼</li>
-				<li>스트라이크 4개가 되면 성공입니다.</li>
+				<li>4개의 숫자, 위치 모두 다를 경우 아웃</li>
+				<li>아웃 3회시 실패, 도전 기회는 10회 입니다.</li>
+				<li>스트라이크 4개가 되면 홈런(성공)입니다.</li>
 			</ol>
 
-			<p class="result">
-				입력값: <span id="prevInput"></span> 스트라이크:
-				<span id="strike"></span> 볼: <span id="ball"></span>
-			</p>
-			<form action="/" class="userForm">
-				<input type="number" id="userInput" />
-				<button type="submit" id="btnSubmit">도전</button>
-			</form>
-
 			<p id="complete">
-				성공! 🎉
+				<span></span>
 				<button>다시 하기</button>
 			</p>
+
+			<form action="/" class="userForm">
+				<input type="number" id="userInput" />
+				<button type="submit">도전</button>
+			</form>
+
+			<div class="result"></div>
 		</main>
 
 		<script>
-			const strikeEl = document.querySelector("#strike");
-			const ballEl = document.querySelector("#ball");
+			const resultEl = document.querySelector(".result");
+			const userForm = document.querySelector(".userForm");
+
 			const userInput = document.querySelector("#userInput");
 			const btnSubmit = document.querySelector("#btnSubmit");
 			const prevInput = document.querySelector("#prevInput");
@@ -130,15 +133,19 @@
 			const btnRestart = document.querySelector("#complete button");
 
 			const numberArr = getRandomNum(4);
+			const triedNums = [];
 			console.log(numberArr);
 
-			let strike, ball;
+			let strike = 0;
+			let ball = 0;
+			let out = 0;
+			let playNum = 0;
 
 			// 랜덤 숫자 배열 생성
 			function getRandomNum(len) {
 				const numArr = [];
 				for (let i = 0; i < len; i++) {
-					const randomNum = parseInt(Math.random() * 10);
+					const randomNum = Math.floor(Math.random() * 9 + 1);
 
 					if (numArr.indexOf(randomNum) >= 0) {
 						i--;
@@ -150,19 +157,67 @@
 				return numArr;
 			}
 
-			userInput.addEventListener("input", (e) => {
-				const value = e.target.value;
-
-				if (value.length > 4) {
-					userInput.value = value.slice(0, 4);
-				}
-			});
-
-			btnSubmit.addEventListener("click", (e) => {
-				e.preventDefault();
-				const value = userInput.value;
-
+			function checkInput(value) {
 				if (value === "" || strike === 4) {
+					return false;
+				}
+
+				// 스트라이크일 때
+				if (value === numberArr.join("")) {
+					console.log(numberArr.join(""));
+					strike = 4;
+					return true;
+				}
+
+				// 중복된 숫자일 때
+				if (new Set(value).size !== 4) {
+					alert("서로 다른 숫자 4자리를 입력해 주세요");
+					return false;
+				}
+
+				// 이전에 시도한 숫자일 때
+				if (triedNums.includes(value)) {
+					alert("이전에 시도한 숫자 입니다.");
+					return false;
+				}
+
+				return true;
+			}
+
+			function gameResult(value) {
+				const p = document.createElement("p");
+				p.textContent = `입력값: ${value} 스트라이크: ${strike} 볼: ${ball} 아웃: ${out} ${
+					playNum + 1
+				}번째`;
+
+				resultEl.append(p);
+				userInput.value = "";
+				userInput.focus();
+				playNum += 1;
+
+				if (strike === 4) {
+					finishGame("win");
+				} else if (playNum >= 10 || out === 3) {
+					finishGame("lose");
+				}
+			}
+
+			function finishGame(result) {
+				if (result === "win") {
+					completeEl.querySelector("span").textContent = "성공! 🎉";
+				} else if (result === "lose") {
+					completeEl.querySelector("span").textContent = "실패! 😥";
+				}
+				completeEl.classList.add("isOn");
+			}
+
+			userForm.addEventListener("submit", (e) => {
+				e.preventDefault();
+
+				const value = e.target[0].value;
+				if (!checkInput(value)) {
+					userInput.value = "";
+					userInput.focus();
 					return;
 				}
 
@@ -173,18 +228,24 @@
 					if (num === +value[idx]) {
 						strike += 1;
 					} else {
-						numberArr.indexOf(+value[idx]) >= 0 && (ball += 1);
+						if (numberArr.indexOf(+value[idx]) > -1) {
+							ball += 1;
+						}
 					}
 				});
+				if (strike === 0 && ball === 0) {
+					out += 1;
+				}
 
-				strikeEl.textContent = strike;
-				ballEl.textContent = ball;
-				prevInput.textContent = value;
-				userInput.value = "";
-				userInput.focus();
+				gameResult(value);
+				triedNums.push(value);
+			});
 
-				if (strike === 4) {
-					completeEl.classList.add("isOn");
+			userInput.addEventListener("input", (e) => {
+				const value = e.target.value;
+
+				if (value.length > 4) {
+					userInput.value = value.slice(0, 4);
 				}
 			});
 
