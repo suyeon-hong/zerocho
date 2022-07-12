@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>계산기</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul,
+			ol {
+				list-style: none;
+			}
+			input:focus {
+				outline: none;
+			}
+
+			.calc {
+				width: 400px;
+				border: 1px solid #888;
+				border-radius: 10px;
+				margin: 50px auto 0;
+				overflow: hidden;
+				background: #bbb;
+			}
+			#userInput {
+				width: 100%;
+				height: 70px;
+				border: none;
+				padding: 10px 20px;
+				font-size: 24px;
+				text-align: right;
+				background-color: #efefef;
+				margin-bottom: 2px;
+			}
+
+			.calc ul {
+				width: 100%;
+			}
+			.calc ul li {
+				width: 100%;
+				display: flex;
+				gap: 2px;
+				margin-bottom: 2px;
+			}
+			.calc ul li:last-child {
+				margin-bottom: 0;
+			}
+			.calc ul li div {
+				width: calc((100% - 6px) / 4);
+				height: 70px;
+				text-align: center;
+				font-size: 24px;
+				line-height: 70px;
+				cursor: pointer;
+				background-color: #efefef;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="calc">
+			<input type="text" id="userInput" />
+			<ul>
+				<li>
+					<div>7</div>
+					<div>8</div>
+					<div>9</div>
+					<div>CE</div>
+				</li>
+				<li>
+					<div>4</div>
+					<div>5</div>
+					<div>6</div>
+					<div>÷</div>
+				</li>
+				<li>
+					<div>1</div>
+					<div>2</div>
+					<div>3</div>
+					<div>×</div>
+				</li>
+				<li>
+					<div>+</div>
+					<div>0</div>
+					<div>-</div>
+					<div>=</div>
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>
