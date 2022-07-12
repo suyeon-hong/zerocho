@@ -60,6 +60,9 @@
 				cursor: pointer;
 				background-color: #efefef;
 			}
+			.calc ul li div:hover {
+				background-color: #ddd;
+			}
 		</style>
 	</head>
 	<body>
@@ -82,7 +85,7 @@
 					<div>1</div>
 					<div>2</div>
 					<div>3</div>
-					<div>×</div>
+					<div>x</div>
 				</li>
 				<li>
 					<div>+</div>
@@ -92,5 +95,101 @@
 				</li>
 			</ul>
 		</div>
+
+		<script>
+			const userInputEl = document.querySelector("#userInput");
+			const calculator = document.querySelector(".calc ul");
+
+			let prevNum = "";
+			let nextNum = "";
+			let operator = undefined;
+
+			userInputEl.addEventListener("input", (e) => {
+				const userInput = e.target.value;
+
+				// 숫자인지 확인
+				if (isNum(userInput)) {
+					prevNum = userInput;
+				}
+
+				setUserInputEl(prevNum);
+			});
+
+			calculator.addEventListener("click", (e) => {
+				if (e.target.nodeName !== "DIV") {
+					return;
+				}
+				const value = e.target.textContent;
+
+				// 숫자일때
+				if (isNum(value)) {
+					nextNum += value;
+					setUserInputEl(nextNum);
+				} else {
+					// 초기화버튼 클릭 시
+					if (value === "CE") {
+						prevNum = "";
+						nextNum = "";
+						operator = undefined;
+						setUserInputEl(nextNum);
+					} else if (value === "=") {
+						// 등호버튼 클릭 시
+						if (operator !== undefined) {
+							calculate(operator);
+							setUserInputEl(prevNum);
+							operator = undefined;
+						}
+					} else {
+						if (operator !== undefined) {
+							calculate(operator);
+							operator = value;
+						} else {
+							operator = value;
+							prevNum += nextNum;
+							nextNum = "";
+						}
+					}
+				}
+			});
+
+			function isNum(value) {
+				const num = /^[0-9]*$/;
+
+				return num.test(value);
+			}
+
+			function calculate(value) {
+				switch (value) {
+					case "÷": {
+						prevNum = +prevNum / +nextNum;
+						nextNum = "";
+						break;
+					}
+					case "x": {
+						prevNum = +prevNum * +nextNum;
+						nextNum = "";
+						break;
+					}
+					case "+": {
+						prevNum = +prevNum + +nextNum;
+						nextNum = "";
+						break;
+					}
+					case "-": {
+						prevNum = +prevNum - +nextNum;
+						nextNum = "";
+						break;
+					}
+					default: {
+						console.error("잘못된 값입니다");
+						break;
+					}
+				}
+			}
+
+			function setUserInputEl(value) {
+				userInputEl.value = value;
+			}
+		</script>
 	</body>
 </html>
