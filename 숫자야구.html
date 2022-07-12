@@ -50,6 +50,7 @@
 				width: 100%;
 				display: flex;
 				gap: 10px;
+				margin-bottom: 20px;
 			}
 			.userForm input {
 				width: calc(100% - 130px);
@@ -70,6 +71,27 @@
 				line-height: 50px;
 				cursor: pointer;
 			}
+
+			#complete {
+				font-size: 18px;
+				font-weight: bold;
+				color: darkgreen;
+				display: none;
+				justify-content: center;
+				align-items: center;
+				gap: 20px;
+			}
+			#complete.isOn {
+				display: flex;
+			}
+			#complete button {
+				width: 120px;
+				height: 40px;
+				font-size: 20px;
+				font-weight: bold;
+				color: inherit;
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
@@ -84,12 +106,91 @@
 			</ol>
 
 			<p class="result">
-				스트라이크: <span id="strike"></span> 볼: <span id="ball"></span>
+				입력값: <span id="prevInput"></span> 스트라이크:
+				<span id="strike"></span> 볼: <span id="ball"></span>
 			</p>
 			<form action="/" class="userForm">
 				<input type="number" id="userInput" />
 				<button type="submit" id="btnSubmit">도전</button>
 			</form>
+
+			<p id="complete">
+				성공! 🎉
+				<button>다시 하기</button>
+			</p>
 		</main>
+
+		<script>
+			const strikeEl = document.querySelector("#strike");
+			const ballEl = document.querySelector("#ball");
+			const userInput = document.querySelector("#userInput");
+			const btnSubmit = document.querySelector("#btnSubmit");
+			const prevInput = document.querySelector("#prevInput");
+			const completeEl = document.querySelector("#complete");
+			const btnRestart = document.querySelector("#complete button");
+
+			const numberArr = getRandomNum(4);
+			console.log(numberArr);
+
+			let strike, ball;
+
+			// 랜덤 숫자 배열 생성
+			function getRandomNum(len) {
+				const numArr = [];
+				for (let i = 0; i < len; i++) {
+					const randomNum = parseInt(Math.random() * 10);
+
+					if (numArr.indexOf(randomNum) >= 0) {
+						i--;
+					} else {
+						numArr.push(randomNum);
+					}
+				}
+
+				return numArr;
+			}
+
+			userInput.addEventListener("input", (e) => {
+				const value = e.target.value;
+
+				if (value.length > 4) {
+					userInput.value = value.slice(0, 4);
+				}
+			});
+
+			btnSubmit.addEventListener("click", (e) => {
+				e.preventDefault();
+				const value = userInput.value;
+
+				if (value === "" || strike === 4) {
+					return;
+				}
+
+				strike = 0;
+				ball = 0;
+
+				numberArr.map((num, idx) => {
+					if (num === +value[idx]) {
+						strike += 1;
+					} else {
+						numberArr.indexOf(+value[idx]) >= 0 && (ball += 1);
+					}
+				});
+
+				strikeEl.textContent = strike;
+				ballEl.textContent = ball;
+				prevInput.textContent = value;
+				userInput.value = "";
+				userInput.focus();
+
+				if (strike === 4) {
+					completeEl.classList.add("isOn");
+				}
+			});
+
+			btnRestart.addEventListener("click", () => {
+				location.reload();
+			});
+		</script>
 	</body>
 </html>
