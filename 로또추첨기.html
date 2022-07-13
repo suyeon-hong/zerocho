@@ -6,36 +6,36 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>로또추첨기</title>
 		<style>
-			*{
+			* {
 				padding: 0;
 				margin: 0;
 				box-sizing: border-box;
 			}
 
-			main{
+			main {
 				margin: 50px auto 0;
 				max-width: 800px;
 				padding: 0 30px;
 			}
 
-			.tit{
+			.tit {
 				display: flex;
 				justify-content: flex-start;
 				align-items: center;
 				gap: 30px;
 				margin-bottom: 20px;
 			}
-			.tit h1{
+			.tit h1 {
 				font-size: 28px;
 			}
-			.tit button{
+			.tit button {
 				width: 120px;
 				height: 40px;
 				font-size: 18px;
 				cursor: pointer;
 			}
 
-			p{
+			p {
 				font-size: 18px;
 				line-height: 1.5;
 				display: flex;
@@ -43,7 +43,7 @@
 				justify-content: flex-start;
 				gap: 10px;
 			}
-			span{
+			span {
 				display: inline-block;
 				width: 30px;
 				height: 30px;
@@ -52,6 +52,7 @@
 				font-weight: bold;
 				text-align: center;
 				color: #fff;
+				background-color: aqua;
 			}
 		</style>
 	</head>
@@ -61,10 +62,89 @@
 				<h1>로또추첨기</h1>
 				<button type="submit">추첨 시작</button>
 			</div>
-			
-			<p id="raffleNum">추첨번호: </p>
-			<p id="bonusNum">보너스번호: </p>
-			
-		</ㅡ>
+
+			<p id="raffleNum">추첨번호:</p>
+			<p id="bonusNum">보너스번호:</p>
+		</main>
+
+		<script>
+			const btnStart = document.querySelector(".tit button");
+			const raffleNumEl = document.querySelector("#raffleNum");
+			const bonusNumEl = document.querySelector("#bonusNum");
+
+			let lotteryTotalNum;
+			let isActive = false;
+
+			btnStart.addEventListener("click", startGame);
+
+			function startGame() {
+				if (isActive) {
+					return;
+				}
+
+				isActive = true;
+
+				raffleNumEl.innerHTML = "추첨번호:";
+				bonusNumEl.innerHTML = "보너스번호:";
+
+				lotteryTotalNum = maketotalArr();
+				const raffleNum = getRaffleNum();
+
+				showNums(raffleNum);
+			}
+
+			function showNums(raffleArr) {
+				let count = 0;
+
+				const timer = setInterval(() => {
+					const span = document.createElement("span");
+					span.textContent = raffleArr[count];
+
+					if (raffleArr[count] < 10) {
+						span.style.backgroundColor = "red";
+					} else if (raffleArr[count] < 20) {
+						span.style.backgroundColor = "blue";
+					} else if (raffleArr[count] < 30) {
+						span.style.backgroundColor = "darkorange";
+					} else if (raffleArr[count] < 40) {
+						span.style.backgroundColor = "green";
+					} else {
+						span.style.backgroundColor = "violet";
+					}
+
+					if (count < 6) {
+						raffleNumEl.append(span);
+					} else {
+						bonusNumEl.append(span);
+					}
+					count += 1;
+					if (count === 7) {
+						clearInterval(timer);
+						isActive = false;
+					}
+				}, 800);
+			}
+
+			function getRaffleNum() {
+				const arr = [];
+
+				for (let i = 0; i < 7; i++) {
+					const randomNum = Math.floor(Math.random() * (45 - i));
+
+					arr.push(lotteryTotalNum[randomNum]);
+					lotteryTotalNum.splice(randomNum, 1);
+				}
+
+				return arr;
+			}
+
+			function maketotalArr() {
+				return Array(45)
+					.fill()
+					.map((el, i) => {
+						return i + 1;
+					});
+			}
+		</script>
 	</body>
 </html>
