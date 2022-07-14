@@ -107,9 +107,9 @@
 			let timer;
 			let idx;
 			let count = 0;
-			let clickable = false;
-			let comPoint;
-			let userPoint;
+			let clickable = true;
+			let comPoint = 0;
+			let userPoint = 0;
 
 			function btnReset() {
 				$btnWrap.querySelectorAll("li").forEach((btn) => {
@@ -188,7 +188,7 @@
 					$p.textContent = `무승부! 비겼어요`;
 				}
 
-				if (count >= 5) {
+				if (count >= 5 || comPoint >= 3 || userPoint >= 3) {
 					let win;
 
 					if (comPoint > userPoint) {
@@ -198,23 +198,26 @@
 					}
 
 					$p.innerHTML += `<br><p class='result'>${win}가 승리했어요<p>`;
-				}
+					$main.append($p);
 
-				$main.append($p);
-				setTimeout(() => {
-					mixImg();
-					btnReset();
 					clickable = false;
-				}, 1000);
+				} else {
+					$main.append($p);
+					setTimeout(() => {
+						mixImg();
+						btnReset();
+						clickable = true;
+					}, 1000);
+				}
 			}
 
 			function clickHandler(e) {
 				const targetId = e.target.id;
 
-				if (targetId === "" || clickable) {
+				if (targetId === "" || !clickable) {
 					return;
 				}
-				clickable = true;
+				clickable = false;
 
 				showResult(targetId);
 
