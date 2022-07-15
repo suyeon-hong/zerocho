@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>반응속도 체크</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+
+			main {
+				margin: 50px auto 0;
+				padding: 0 30px;
+			}
+
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+			.noti {
+				padding-left: 20px;
+				margin-bottom: 30px;
+			}
+			.noti li {
+				font-size: 13px;
+				line-height: 1.5;
+				color: #666;
+			}
+			.blue {
+				background-color: lightskyblue;
+				color: blue;
+			}
+			.red {
+				background-color: lightpink;
+				color: red;
+			}
+			.green {
+				background-color: lightgreen;
+				color: green;
+			}
+
+			.playBox {
+				width: 300px;
+				height: 300px;
+				background-color: lightskyblue;
+				padding: 20px;
+				font-size: 14px;
+				color: #222;
+				cursor: pointer;
+			}
+			.playBox.ready {
+				background-color: lightpink;
+			}
+			.playBox.play {
+				background-color: lightgreen;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>반응속도 체크</h1>
+
+			<ol class="noti">
+				<li>
+					<span class="blue">파란화면</span> : 게임 대기상태, 클릭해서 게임을
+					시작해 주세요.
+				</li>
+				<li>
+					<span class="red">빨간화면</span> : 게임 진행상태, 초록화면이 나타날
+					때까지 기다려 주세요.
+				</li>
+				<li>
+					<span class="green">초록화면</span> : 클릭해서 반응속도를 체크해
+					보세요.
+				</li>
+			</ol>
+
+			<div class="playBox">
+				<p>화면을 눌러 게임을 시작하세요.</p>
+			</div>
+		</main>
+	</body>
+</html>
