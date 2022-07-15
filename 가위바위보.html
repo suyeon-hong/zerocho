@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>가위바위보</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul {
+				list-style: none;
+			}
+
+			main {
+				margin: 50px auto 0;
+				padding: 0 30px;
+			}
+
+			.tit {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+
+			.noti {
+				padding-left: 20px;
+				font-size: 13px;
+				color: #666;
+				margin-bottom: 30px;
+			}
+
+			.img {
+				width: 142px;
+				height: 142px;
+				overflow: hidden;
+				background: url(./img/rsp.png) no-repeat;
+				background-size: auto 142px;
+				margin-bottom: 30px;
+				margin-left: 100px;
+			}
+
+			.button_wrap {
+				margin-bottom: 20px;
+			}
+			.button_wrap li {
+				display: inline-block;
+				width: 80px;
+				height: 40px;
+				border-radius: 20px;
+				background-color: antiquewhite;
+				font-size: 20px;
+				font-weight: bold;
+				line-height: 40px;
+				text-align: center;
+				margin-right: 20px;
+				cursor: pointer;
+			}
+			.button_wrap li.isOn {
+				background-color: lightblue;
+				color: #fff;
+			}
+
+			.result {
+				font-size: 24px;
+				font-weight: bold;
+				color: tomato;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1 class="tit">가위바위보</h1>
+
+			<ol class="noti">
+				<li>아래 가위, 바위, 보 버튼 중 한 가지를 선택해 클릭해 주세요.</li>
+				<li>5판 3선승제 입니다.</li>
+			</ol>
+
+			<div class="img"></div>
+
+			<ul class="button_wrap">
+				<li id="scissors">가위</li>
+				<li id="rock">바위</li>
+				<li id="paper">보</li>
+			</ul>
+		</main>
+
+		<script>
+			const $main = document.querySelector("main");
+			const $img = document.querySelector(".img");
+			const $btnWrap = document.querySelector(".button_wrap");
+
+			const bgPos = {
+				scissors: "0px",
+				rock: "-150px",
+				paper: "-300px",
+			};
+
+			const srpNum = [-1, 0, 1];
+			const srpString = ["scissors", "rock", "paper"];
+
+			let computerChoice = "scissors";
+			let timer;
+			let idx;
+			let count = 0;
+			let clickable = true;
+			let comPoint = 0;
+			let userPoint = 0;
+
+			function btnReset() {
+				$btnWrap.querySelectorAll("li").forEach((btn) => {
+					btn.classList.remove("isOn");
+				});
+			}
+
+			function mixImg() {
+				timer = setInterval(() => {
+					const randomNum = Math.floor(Math.random() * 3);
+
+					computerChoice = srpString[randomNum];
+
+					if (computerChoice === "scissors") {
+						$img.style.backgroundPosition = bgPos.scissors;
+					} else if (computerChoice === "rock") {
+						$img.style.backgroundPosition = bgPos.rock;
+					} else if (computerChoice === "paper") {
+						$img.style.backgroundPosition = bgPos.paper;
+					}
+				}, 30);
+			}
+
+			function stringToNum(value) {
+				let num;
+
+				switch (value) {
+					case "scissors": {
+						num = srpNum[0];
+						break;
+					}
+					case "rock": {
+						num = srpNum[1];
+						break;
+					}
+					case "paper": {
+						num = srpNum[2];
+						break;
+					}
+					default: {
+						console.error("잘못된 값입니다.");
+					}
+				}
+
+				return num;
+			}
+
+			function calcReult(userChoice) {
+				const com = stringToNum(computerChoice);
+				const user = stringToNum(userChoice);
+				const result = com - user;
+
+				if ([1, -2].includes(result)) {
+					return "com";
+				} else if ([-1, 2].includes(result)) {
+					return "user";
+				} else {
+					return "tie";
+				}
+			}
+
+			function showResult(userChoice) {
+				const winner = calcReult(userChoice);
+				const $p = document.createElement("p");
+				$p.class = "result";
+
+				if (winner === "com") {
+					count += 1;
+					comPoint += 1;
+					$p.textContent = `${count}번째 게임 | 컴퓨터에게 패배했어요.😥 `;
+				} else if (winner === "user") {
+					count += 1;
+					userPoint += 1;
+					$p.textContent = `${count}번째 게임 | 컴퓨터를 이겼어요! 🥳`;
+				} else if (winner === "tie") {
+					$p.textContent = `무승부! 비겼어요`;
+				}
+
+				if (count >= 5 || comPoint >= 3 || userPoint >= 3) {
+					let win;
+
+					if (comPoint > userPoint) {
+						win = "컴퓨터";
+					} else {
+						win = "유저";
+					}
+
+					$p.innerHTML += `<br><p class='result'>${win}가 승리했어요<p>`;
+					$main.append($p);
+
+					clickable = false;
+				} else {
+					$main.append($p);
+					setTimeout(() => {
+						mixImg();
+						btnReset();
+						clickable = true;
+					}, 1000);
+				}
+			}
+
+			function clickHandler(e) {
+				const targetId = e.target.id;
+
+				if (targetId === "" || !clickable) {
+					return;
+				}
+				clickable = false;
+
+				showResult(targetId);
+
+				btnReset();
+				e.target.classList.add("isOn");
+				clearInterval(timer);
+			}
+
+			$btnWrap.addEventListener("click", (e) => clickHandler(e));
+
+			window.onload = () => {
+				mixImg();
+				btnReset();
+			};
+		</script>
+	</body>
+</html>
