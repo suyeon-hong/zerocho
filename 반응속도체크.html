@@ -47,6 +47,12 @@
 				color: green;
 			}
 
+			h2 {
+				font-size: 18px;
+				font-weight: bold;
+				margin-bottom: 10px;
+			}
+
 			.playBox {
 				width: 300px;
 				height: 300px;
@@ -55,6 +61,11 @@
 				color: #222;
 				cursor: pointer;
 				margin-bottom: 30px;
+
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
 			}
 			.playBox.ready {
 				background-color: lightskyblue;
@@ -69,11 +80,6 @@
 			.result li {
 				font-size: 16px;
 				line-height: 1.5;
-			}
-			.result li:first-child {
-				font-size: 18px;
-				font-weight: bold;
-				margin-bottom: 10px;
 			}
 		</style>
 	</head>
@@ -100,9 +106,8 @@
 				<p>화면을 눌러 게임을 시작하세요.</p>
 			</div>
 
-			<ul class="result">
-				<li>평균속도: <span class="average"></span></li>
-			</ul>
+			<h2>평균속도: <span class="average"></span></h2>
+			<ul class="result"></ul>
 		</main>
 
 		<script>
@@ -118,10 +123,8 @@
 
 			function setGrennBoxTimeout() {
 				const time = Math.floor(Math.random() * 2000 + 1000);
-				console.log(time);
 				timer = setTimeout(() => {
-					$playBox.classList.remove("await");
-					$playBox.classList.add("play");
+					$playBox.classList.replace("await", "play");
 					$playBoxTxt.textContent = "클릭하세요!!!!!!!!!";
 
 					startTime = getRecentTime();
@@ -142,34 +145,44 @@
 				return avg;
 			}
 
-			const clickHandler = () => {
-				const classList = [...$playBox.classList];
+			function showRank() {
+				const sortRecord = timeRecord.sort((a, b) => a - b);
 
-				if (classList.includes("ready")) {
-					$playBox.classList.remove("ready");
-					$playBox.classList.add("await");
+				$result.innerHTML = "";
+
+				sortRecord.map((el, idx) => {
+					if (idx > 4) {
+						return;
+					}
+
+					const li = document.createElement("li");
+					li.textContent = `${idx + 1}위: ${el}ms`;
+					$result.append(li);
+				});
+			}
+
+			const clickHandler = () => {
+				const classList = $playBox.classList;
+
+				if (classList.contains("ready")) {
+					$playBox.classList.replace("ready", "await");
 					$playBoxTxt.textContent = "초록색 화면이 나오면 클릭해 주세요.";
 
 					setGrennBoxTimeout();
-				} else if (classList.includes("await")) {
-					const li = document.createElement("li");
-					li.textContent = "너무 빨리 클릭했습니다.";
-
-					$result.append(li);
-				} else if (classList.includes("play")) {
+				} else if (classList.contains("await")) {
+					clearTimeout(timer);
+					$playBox.classList.replace("await", "ready");
+					$playBoxTxt.textContent = "너무 빨리 클릭했습니다.";
+				} else if (classList.contains("play")) {
 					clickTime = getRecentTime();
 
-					$playBox.classList.remove("play");
-					$playBox.classList.add("ready");
+					$playBox.classList.replace("play", "ready");
 					$playBoxTxt.textContent = "화면을 눌러 게임을 시작하세요.";
 
 					const average = calcResult();
-					const li = document.createElement("li");
-
-					$average.textContent = `${average}ms`;
-					li.textContent = `${clickTime - startTime}ms`;
-
-					$result.append(li);
+					showRank();
+					startTime = null;
+					clickTime = null;
 				}
 			};
 
