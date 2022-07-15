@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>반응속도 체크</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul {
+				list-style: none;
+			}
+
+			main {
+				margin: 50px auto 0;
+				padding: 0 30px;
+			}
+
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+			.noti {
+				padding-left: 20px;
+				margin-bottom: 30px;
+			}
+			.noti li {
+				font-size: 13px;
+				line-height: 1.5;
+				color: #666;
+			}
+			.blue {
+				background-color: lightskyblue;
+				color: blue;
+			}
+			.red {
+				background-color: lightpink;
+				color: red;
+			}
+			.green {
+				background-color: lightgreen;
+				color: green;
+			}
+
+			h2 {
+				font-size: 18px;
+				font-weight: bold;
+				margin-bottom: 10px;
+			}
+			h2 span {
+				display: inline-block;
+				min-width: 30px;
+			}
+
+			.playBox {
+				width: 300px;
+				height: 300px;
+				padding: 20px;
+				font-size: 14px;
+				color: #222;
+				cursor: pointer;
+				margin-bottom: 30px;
+
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+			.playBox.ready {
+				background-color: lightskyblue;
+			}
+			.playBox.await {
+				background-color: lightpink;
+			}
+			.playBox.play {
+				background-color: lightgreen;
+			}
+
+			.result li {
+				font-size: 16px;
+				line-height: 1.5;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>반응속도 체크</h1>
+
+			<ol class="noti">
+				<li>
+					<span class="blue">파란화면</span> : 게임 대기상태, 클릭해서 게임을
+					시작해 주세요.
+				</li>
+				<li>
+					<span class="red">빨간화면</span> : 게임 진행상태, 초록화면이 나타날
+					때까지 기다려 주세요.
+				</li>
+				<li>
+					<span class="green">초록화면</span> : 클릭해서 반응속도를 체크해
+					보세요.
+				</li>
+			</ol>
+
+			<div class="playBox ready">
+				<p>화면을 눌러 게임을 시작하세요.</p>
+			</div>
+
+			<h2>
+				현재속도: <span class="now"></span> 평균속도:
+				<span class="average"></span>
+			</h2>
+			<ul class="result"></ul>
+		</main>
+
+		<script>
+			const $playBox = document.querySelector(".playBox");
+			const $playBoxTxt = $playBox.querySelector("p");
+			const $result = document.querySelector(".result");
+			const $now = document.querySelector(".now");
+			const $average = document.querySelector(".average");
+
+			let timer;
+			let startTime;
+			let clickTime;
+			const timeRecord = [];
+
+			function setGrennBoxTimeout() {
+				const time = Math.floor(Math.random() * 2000 + 1000);
+				timer = setTimeout(() => {
+					$playBox.classList.replace("await", "play");
+					$playBoxTxt.textContent = "클릭하세요!!!!!!!!!";
+
+					startTime = getRecentTime();
+				}, time);
+			}
+
+			function getRecentTime() {
+				return new Date().getTime();
+			}
+
+			function calcResult() {
+				const result = clickTime - startTime;
+				timeRecord.push(result);
+
+				let avg = timeRecord.reduce((a, b) => a + b, 0) / timeRecord.length;
+				avg = Math.floor(avg);
+
+				$now.textContent = `${result}ms`;
+				$average.textContent = `${avg}ms`;
+
+				return avg;
+			}
+
+			function showRank() {
+				const sortRecord = timeRecord.sort((a, b) => a - b);
+
+				$result.innerHTML = "";
+
+				sortRecord.map((el, idx) => {
+					if (idx > 4) {
+						return;
+					}
+
+					const li = document.createElement("li");
+					li.textContent = `${idx + 1}위: ${el}ms`;
+					$result.append(li);
+				});
+			}
+
+			const clickHandler = () => {
+				const classList = $playBox.classList;
+
+				if (classList.contains("ready")) {
+					$playBox.classList.replace("ready", "await");
+					$playBoxTxt.textContent = "초록색 화면이 나오면 클릭해 주세요.";
+
+					setGrennBoxTimeout();
+				} else if (classList.contains("await")) {
+					clearTimeout(timer);
+					$playBox.classList.replace("await", "ready");
+					$playBoxTxt.textContent = "너무 빨리 클릭했습니다.";
+				} else if (classList.contains("play")) {
+					clickTime = getRecentTime();
+
+					$playBox.classList.replace("play", "ready");
+					$playBoxTxt.textContent = "화면을 눌러 게임을 시작하세요.";
+
+					const average = calcResult();
+
+					showRank();
+					startTime = null;
+					clickTime = null;
+				}
+			};
+
+			$playBox.addEventListener("click", clickHandler);
+		</script>
+	</body>
+</html>
