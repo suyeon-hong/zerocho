@@ -52,6 +52,10 @@
 				font-weight: bold;
 				margin-bottom: 10px;
 			}
+			h2 span {
+				display: inline-block;
+				min-width: 30px;
+			}
 
 			.playBox {
 				width: 300px;
@@ -106,7 +110,10 @@
 				<p>화면을 눌러 게임을 시작하세요.</p>
 			</div>
 
-			<h2>평균속도: <span class="average"></span></h2>
+			<h2>
+				현재속도: <span class="now"></span> 평균속도:
+				<span class="average"></span>
+			</h2>
 			<ul class="result"></ul>
 		</main>
 
@@ -114,6 +121,7 @@
 			const $playBox = document.querySelector(".playBox");
 			const $playBoxTxt = $playBox.querySelector("p");
 			const $result = document.querySelector(".result");
+			const $now = document.querySelector(".now");
 			const $average = document.querySelector(".average");
 
 			let timer;
@@ -141,6 +149,9 @@
 
 				let avg = timeRecord.reduce((a, b) => a + b, 0) / timeRecord.length;
 				avg = Math.floor(avg);
+
+				$now.textContent = `${result}ms`;
+				$average.textContent = `${avg}ms`;
 
 				return avg;
 			}
@@ -180,6 +191,7 @@
 					$playBoxTxt.textContent = "화면을 눌러 게임을 시작하세요.";
 
 					const average = calcResult();
+
 					showRank();
 					startTime = null;
 					clickTime = null;
