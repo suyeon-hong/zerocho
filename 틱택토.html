@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>틱택토</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul {
+				list-style: none;
+			}
+
+			main {
+				margin: 50px auto 0;
+				padding: 30px;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+
+			.noti {
+				padding-left: 20px;
+				margin-bottom: 30px;
+			}
+			.noti li {
+				font-size: 13px;
+				color: #666;
+				line-height: 1.2;
+			}
+
+			.button_wrap {
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				gap: 20px;
+				margin-bottom: 30px;
+			}
+			.button_wrap button {
+				width: 80px;
+				height: 40px;
+				font-size: 24px;
+				cursor: pointer;
+			}
+
+			table {
+				width: 500px;
+				height: 500px;
+			}
+			table tbody {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+			table tr {
+				width: 100%;
+				height: calc((100% - 20px) / 3);
+				display: flex;
+				gap: 10px;
+			}
+			table tr td {
+				width: calc((100% - 20px) / 3);
+				height: 100%;
+				font-size: 100px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: #ddd;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>틱택토</h1>
+
+			<ol class="noti">
+				<li>먼저 시작할 Player를 선택해 주세요.(O/X)</li>
+				<li>
+					가로, 세로, 대각선으로 이어진 3칸을 먼저 완성한 사람이 승리합니다.
+				</li>
+			</ol>
+
+			<ul class="button_wrap">
+				<li><button>O</button></li>
+				<li><button>X</button></li>
+			</ul>
+
+			<table>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</main>
+	</body>
+</html>
