@@ -53,6 +53,14 @@
 				font-size: 24px;
 				cursor: pointer;
 			}
+			.button_wrap li {
+				font-size: 20px;
+				font-weight: bold;
+			}
+			.button_wrap #player {
+				font-size: 28px;
+				color: tomato;
+			}
 
 			table {
 				width: 500px;
@@ -97,13 +105,18 @@
 			<ul class="button_wrap">
 				<li><button>O</button></li>
 				<li><button>X</button></li>
+				<li>Player : <span id="player"></span></li>
 			</ul>
 		</main>
 
 		<script>
 			const $main = document.querySelector("main");
+			const $playerBtnWrap = document.querySelector(".button_wrap");
+			const $player = document.querySelector("#player");
 
 			const fieldArr = Array(3).fill(Array(3).fill(undefined));
+			let player;
+			let isGameStarted = false;
 
 			function makeGameField() {
 				const $table = document.createElement("table");
@@ -122,12 +135,19 @@
 				$main.append($table);
 			}
 
-			function init() {
-				makeGameField();
-			}
+			$playerBtnWrap.addEventListener("click", (e) => {
+				const target = e.target.nodeName;
+
+				if (target !== "BUTTON" || isGameStarted) {
+					return;
+				}
+				player = e.target.innerText;
+				$player.textContent = player;
+				console.log(player);
+			});
 
 			window.onload = () => {
-				init();
+				makeGameField();
 			};
 		</script>
 	</body>
