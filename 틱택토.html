@@ -57,10 +57,6 @@
 			table {
 				width: 500px;
 				height: 500px;
-			}
-			table tbody {
-				width: 100%;
-				height: 100%;
 				display: flex;
 				flex-direction: column;
 				gap: 10px;
@@ -80,6 +76,10 @@
 				align-items: center;
 				background-color: #ddd;
 				cursor: pointer;
+				transition: 0.4s;
+			}
+			table tr td:hover {
+				background-color: #eee;
 			}
 		</style>
 	</head>
@@ -98,24 +98,37 @@
 				<li><button>O</button></li>
 				<li><button>X</button></li>
 			</ul>
-
-			<table>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-			</table>
 		</main>
+
+		<script>
+			const $main = document.querySelector("main");
+
+			const fieldArr = Array(3).fill(Array(3).fill(undefined));
+
+			function makeGameField() {
+				const $table = document.createElement("table");
+
+				for (let i = 0; i < 3; i++) {
+					const $tr = document.createElement("tr");
+
+					for (let j = 0; j < 3; j++) {
+						const $td = document.createElement("td");
+
+						$tr.append($td);
+					}
+					$table.append($tr);
+				}
+
+				$main.append($table);
+			}
+
+			function init() {
+				makeGameField();
+			}
+
+			window.onload = () => {
+				init();
+			};
+		</script>
 	</body>
 </html>
