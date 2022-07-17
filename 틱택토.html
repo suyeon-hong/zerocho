@@ -114,18 +114,27 @@
 			const $playerBtnWrap = document.querySelector(".button_wrap");
 			const $player = document.querySelector("#player");
 
-			const fieldArr = Array(3).fill(Array(3).fill(undefined));
+			const fieldArr = Array.from(Array(3), () => Array(3).fill(null));
 			let player;
 			let isGameStarted = false;
 
-			function makeGameField() {
+			function updateGameField() {
+				const $prevTable = document.querySelector("table");
+
+				if ($prevTable !== null) {
+					$prevTable.remove();
+				}
 				const $table = document.createElement("table");
 
-				for (let i = 0; i < 3; i++) {
+				for (let i = 0; i < fieldArr.length; i++) {
 					const $tr = document.createElement("tr");
 
-					for (let j = 0; j < 3; j++) {
+					for (let j = 0; j < fieldArr[i].length; j++) {
 						const $td = document.createElement("td");
+						$td.setAttribute("data-id", `${i}${j}`);
+						if (fieldArr[i][j] !== null) {
+							$td.textContent = fieldArr[i][j];
+						}
 
 						$tr.append($td);
 					}
@@ -133,6 +142,16 @@
 				}
 
 				$main.append($table);
+			}
+
+			function finishGame(tie) {
+				if (tie) {
+					console.log("무승부");
+				} else {
+					console.log(`${player}승리!`);
+				}
+				updateGameField();
+				return;
 			}
 
 			$playerBtnWrap.addEventListener("click", (e) => {
@@ -143,11 +162,80 @@
 				}
 				player = e.target.innerText;
 				$player.textContent = player;
-				console.log(player);
+			});
+
+			$main.addEventListener("click", (e) => {
+				const target = e.target;
+
+				if (target.nodeName !== "TD" || player === undefined) {
+					return;
+				}
+				isGameStarted = true;
+				const targetId = target.getAttribute("data-id").split("");
+				const trIdx = targetId[0];
+				const tdIdx = targetId[1];
+
+				if (fieldArr[trIdx][tdIdx] !== null) {
+					return;
+				}
+				fieldArr[trIdx][tdIdx] = player;
+				target.textContent = player;
+
+				if (fieldArr[trIdx][tdIdx] === null) {
+					return;
+				}
+
+				let diagnal = [];
+				const diagnal2 = [];
+
+				for (let i = 0; i < fieldArr.length; i++) {
+					const row = [];
+					const column = [];
+
+					for (let j = 0; j < fieldArr[i].length; j++) {
+						// 가로줄 확인
+						fieldArr[i][j] === player ? row.push(true) : row.push(false);
+
+						// 세로줄 확인
+						fieldArr[j][i] === player ? column.push(true) : column.push(false);
+					}
+
+					// 대각선 확인
+					fieldArr[i][i] === player ? diagnal.push(true) : diagnal.push(false);
+
+					if (!row.includes(false) || !column.includes(false)) {
+						finishGame(false);
+					}
+				}
+
+				// 대각선 확인2
+				const diagLine = [fieldArr[0][2], fieldArr[1][1], fieldArr[2][0]];
+
+				diagLine.forEach((val) => {
+					val === player ? diagnal2.push(true) : diagnal2.push(false);
+				});
+
+				if (!diagnal2.includes(false) || !diagnal.includes(false)) {
+					finishGame(false);
+				} else if (
+					!fieldArr[0].includes(null) &&
+					!fieldArr[1].includes(null) &&
+					!fieldArr[2].includes(null)
+				) {
+					finishGame(true);
+				}
+
+				// player 교체
+				if (player === "O") {
+					player = "X";
+				} else if (player === "X") {
+					player = "O";
+				}
+				$player.textContent = player;
 			});
 
 			window.onload = () => {
-				makeGameField();
+				updateGameField();
 			};
 		</script>
 	</body>
