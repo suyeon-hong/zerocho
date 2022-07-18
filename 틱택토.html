@@ -107,7 +107,7 @@
 			<h1>틱택토</h1>
 
 			<ol class="noti">
-				<li>먼저 시작할 Player를 선택해 주세요.(O/X)</li>
+				<li>Player(O/X)를 선택한 뒤 빈 칸을 클릭하면 게임이 시작됩니다.</li>
 				<li>
 					가로, 세로, 대각선으로 이어진 3칸을 먼저 완성한 사람이 승리합니다.
 				</li>
@@ -127,7 +127,11 @@
 
 			const fieldArr = Array.from(Array(3), () => Array(3).fill(null));
 			let player;
+			let user;
+			let computer;
 			let isGameStarted = false;
+			let timer;
+			let isFinish = false;
 
 			function updateGameField() {
 				const $prevTable = document.querySelector("table");
@@ -173,44 +177,14 @@
 
 				$result.append($resetBtn);
 				$main.append($result);
-				player = undefined;
+				clearTimeout(timer);
+				isFinish = true;
 
 				return;
 			}
 
-			$playerBtnWrap.addEventListener("click", (e) => {
-				const target = e.target.nodeName;
-
-				if (target !== "BUTTON" || isGameStarted) {
-					return;
-				}
-				player = e.target.innerText;
-				$player.textContent = player;
-			});
-
-			$main.addEventListener("click", (e) => {
-				const target = e.target;
-
-				if (target.nodeName !== "TD" || player === undefined) {
-					return;
-				}
-				isGameStarted = true;
-				const targetId = target.getAttribute("data-id").split("");
-				const trIdx = e.target.parentNode.rowIndex;
-				const tdIdx = e.target.cellIndex;
-
-				if (e.target.textContent !== "") {
-					return;
-				}
-				fieldArr[trIdx][tdIdx] = player;
-				target.textContent = player;
-
-				if (fieldArr[trIdx][tdIdx] === null) {
-					return;
-				}
-
+			function checkWinner(trIdx, tdIdx) {
 				let diagnal = false;
-				const diagnal2 = [];
 				let row = false;
 				let column = false;
 
@@ -243,14 +217,75 @@
 				} else if (fieldArr.flat().every((val) => val)) {
 					finishGame(true);
 				}
+			}
+
+			function computerPlay(table) {
+				if (isFinish) {
+					return;
+				}
+
+				const trIdx = Math.floor(Math.random() * 3);
+				const tdIdx = Math.floor(Math.random() * 3);
+
+				if (fieldArr[trIdx][tdIdx] !== null) {
+					computerPlay(table);
+					return;
+				}
+
+				timer = setTimeout(() => {
+					fieldArr[trIdx][tdIdx] = computer;
+					table.querySelectorAll("tr")[trIdx].children[tdIdx].textContent =
+						computer;
+
+					checkWinner(trIdx, tdIdx);
+
+					player = user;
+					$player.textContent = `${user} user`;
+				}, 800);
+			}
+
+			$playerBtnWrap.addEventListener("click", (e) => {
+				const target = e.target.nodeName;
+
+				if (target !== "BUTTON" || isGameStarted) {
+					return;
+				}
+
+				user = e.target.innerText;
+				computer = user === "O" ? "X" : "O";
+				player = user;
+				$player.textContent = `${user} user`;
+			});
+
+			$main.addEventListener("click", (e) => {
+				const target = e.target;
+
+				if (target.nodeName !== "TD" || player === computer || isFinish) {
+					return;
+				}
+				isGameStarted = true;
+				const targetId = target.getAttribute("data-id").split("");
+				const trIdx = e.target.parentNode.rowIndex;
+				const tdIdx = e.target.cellIndex;
+
+				if (e.target.textContent !== "") {
+					return;
+				}
+				fieldArr[trIdx][tdIdx] = player;
+				target.textContent = player;
+
+				if (fieldArr[trIdx][tdIdx] === null) {
+					return;
+				}
+
+				checkWinner(trIdx, tdIdx);
 
 				// player 교체
-				if (player === "O") {
-					player = "X";
-				} else if (player === "X") {
-					player = "O";
-				}
-				$player.textContent = player;
+				player = computer;
+				$player.textContent = `${computer} computer`;
+
+				// computer play
+				computerPlay(target.parentNode.parentNode);
 			});
 
 			window.onload = () => {
