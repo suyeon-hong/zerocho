@@ -68,6 +68,7 @@
 				display: flex;
 				flex-direction: column;
 				gap: 10px;
+				margin-bottom: 20px;
 			}
 			table tr {
 				width: 100%;
@@ -88,6 +89,16 @@
 			}
 			table tr td:hover {
 				background-color: #eee;
+			}
+
+			.result {
+				font-size: 20px;
+			}
+			.result button {
+				display: inline-block;
+				font-size: 18px;
+				margin-left: 20px;
+				cursor: pointer;
 			}
 		</style>
 	</head>
@@ -145,12 +156,25 @@
 			}
 
 			function finishGame(tie) {
+				const $result = document.createElement("p");
+				const $resetBtn = document.createElement("button");
+
+				$result.className = "result";
+				$resetBtn.textContent = "다시하기";
+				$resetBtn.addEventListener("click", () => {
+					location.reload();
+				});
+
 				if (tie) {
-					console.log("무승부");
+					$result.textContent = "무승부";
 				} else {
-					console.log(`${player}승리!`);
+					$result.textContent = `${player}승리!`;
 				}
-				updateGameField();
+
+				$result.append($resetBtn);
+				$main.append($result);
+				player = undefined;
+
 				return;
 			}
 
@@ -205,6 +229,7 @@
 
 					if (!row.includes(false) || !column.includes(false)) {
 						finishGame(false);
+						return;
 					}
 				}
 
@@ -232,6 +257,7 @@
 					player = "O";
 				}
 				$player.textContent = player;
+				// updateGameField();
 			});
 
 			window.onload = () => {
