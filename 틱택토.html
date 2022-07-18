@@ -196,10 +196,10 @@
 				}
 				isGameStarted = true;
 				const targetId = target.getAttribute("data-id").split("");
-				const trIdx = targetId[0];
-				const tdIdx = targetId[1];
+				const trIdx = e.target.parentNode.rowIndex;
+				const tdIdx = e.target.cellIndex;
 
-				if (fieldArr[trIdx][tdIdx] !== null) {
+				if (e.target.textContent !== "") {
 					return;
 				}
 				fieldArr[trIdx][tdIdx] = player;
@@ -209,44 +209,38 @@
 					return;
 				}
 
-				let diagnal = [];
+				let diagnal = false;
 				const diagnal2 = [];
+				let row = false;
+				let column = false;
 
-				for (let i = 0; i < fieldArr.length; i++) {
-					const row = [];
-					const column = [];
+				// 가로줄 확인
+				fieldArr[trIdx][0] === player &&
+					fieldArr[trIdx][1] === player &&
+					fieldArr[trIdx][2] === player &&
+					(row = true);
 
-					for (let j = 0; j < fieldArr[i].length; j++) {
-						// 가로줄 확인
-						fieldArr[i][j] === player ? row.push(true) : row.push(false);
+				// 세로줄 확인
+				fieldArr[0][tdIdx] === player &&
+					fieldArr[1][tdIdx] === player &&
+					fieldArr[2][tdIdx] === player &&
+					(column = true);
 
-						// 세로줄 확인
-						fieldArr[j][i] === player ? column.push(true) : column.push(false);
-					}
-
-					// 대각선 확인
-					fieldArr[i][i] === player ? diagnal.push(true) : diagnal.push(false);
-
-					if (!row.includes(false) || !column.includes(false)) {
-						finishGame(false);
-						return;
-					}
+				// 대각선 확인
+				if (
+					(fieldArr[0][0] === player &&
+						fieldArr[1][1] === player &&
+						fieldArr[2][2] === player) ||
+					(fieldArr[0][2] === player &&
+						fieldArr[1][1] === player &&
+						fieldArr[2][0] === player)
+				) {
+					diagnal = true;
 				}
 
-				// 대각선 확인2
-				const diagLine = [fieldArr[0][2], fieldArr[1][1], fieldArr[2][0]];
-
-				diagLine.forEach((val) => {
-					val === player ? diagnal2.push(true) : diagnal2.push(false);
-				});
-
-				if (!diagnal2.includes(false) || !diagnal.includes(false)) {
+				if (row || column || diagnal) {
 					finishGame(false);
-				} else if (
-					!fieldArr[0].includes(null) &&
-					!fieldArr[1].includes(null) &&
-					!fieldArr[2].includes(null)
-				) {
+				} else if (fieldArr.flat().every((val) => val)) {
 					finishGame(true);
 				}
 
@@ -257,7 +251,6 @@
 					player = "O";
 				}
 				$player.textContent = player;
-				// updateGameField();
 			});
 
 			window.onload = () => {
