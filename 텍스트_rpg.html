@@ -211,9 +211,9 @@
 
 			<form action="/" class="town">
 				<ul class="menu">
-					<li><button>모험 떠나기</button></li>
-					<li><button>휴식 하기</button></li>
-					<li><button>게임 종료</button></li>
+					<li><button data-value="adventure">모험 떠나기</button></li>
+					<li><button data-value="heal">휴식 하기</button></li>
+					<li><button data-value="exit">게임 종료</button></li>
 				</ul>
 
 				<ul class="info">
@@ -264,7 +264,8 @@
 				$login.addEventListener("submit", (e) => {
 					e.preventDefault();
 
-					const targetValue = e.target.querySelector("input").value;
+					const target = e.target;
+					const targetValue = target.querySelector("input").value;
 
 					if (!targetValue) {
 						return;
@@ -272,8 +273,31 @@
 
 					userName = targetValue;
 					$userName.textContent = userName;
-					e.target.classList.remove("active");
+					target.classList.remove("active");
 					$town.classList.add("active");
+					target.querySelector("input").value = "";
+				});
+
+				$town.addEventListener("click", (e) => {
+					e.preventDefault();
+
+					console.log(e.target);
+					const targetValue = e.target.getAttribute("data-value");
+
+					console.log(targetValue);
+					if (targetValue === null) {
+						return;
+					}
+
+					if (targetValue === "adventure") {
+						$adventure.classList.add("active");
+					} else if (targetValue === "heal") {
+						$heal.classList.add("active");
+					} else if (targetValue === "exit") {
+						$login.classList.add("active");
+					}
+
+					$town.classList.remove("active");
 				});
 			</script>
 		</main>
