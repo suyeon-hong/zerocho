@@ -7,6 +7,9 @@
 		<title>텍스트 RPG</title>
 
 		<style>
+			:root {
+				--healBar-width: 100%;
+			}
 			* {
 				padding: 0;
 				margin: 0;
@@ -137,7 +140,7 @@
 			.heal .heal_bar::after {
 				content: "";
 				display: block;
-				width: 0%;
+				width: var(--healBar-width);
 				height: 100%;
 				background: red;
 				position: absolute;
@@ -258,8 +261,29 @@
 				const $adventure = document.querySelector("form.adventure");
 
 				const $userName = document.querySelector("#name");
+				const $userLevle = document.querySelector("#level");
+				const $userHealth = document.querySelector("#health");
 
 				let userName;
+
+				function setHealTime() {
+					let width = +$userHealth.innerText;
+
+					const healing = setInterval(() => {
+						width = width + 10;
+						document.documentElement.style.setProperty(
+							"--healBar-width",
+							`${width}%`
+						);
+
+						if (width >= 100) {
+							clearInterval(healing);
+							$heal.classList.remove("active");
+							$town.classList.add("active");
+							console.log("??");
+						}
+					}, 200);
+				}
 
 				$login.addEventListener("submit", (e) => {
 					e.preventDefault();
@@ -281,19 +305,21 @@
 				$town.addEventListener("click", (e) => {
 					e.preventDefault();
 
-					console.log(e.target);
 					const targetValue = e.target.getAttribute("data-value");
 
-					console.log(targetValue);
 					if (targetValue === null) {
 						return;
 					}
 
 					if (targetValue === "adventure") {
+						// 모험 모드
 						$adventure.classList.add("active");
 					} else if (targetValue === "heal") {
+						// 힐링 모드
 						$heal.classList.add("active");
+						setHealTime();
 					} else if (targetValue === "exit") {
+						// 게임 종료
 						$login.classList.add("active");
 					}
 
