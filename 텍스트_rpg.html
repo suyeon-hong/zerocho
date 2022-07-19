@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>텍스트 RPG</title>
+
+		<style>
+			:root {
+				--healBar-width: 100%;
+				--userHealth-width: 100%;
+				--monsterHealth-width: 100%;
+			}
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul,
+			ol {
+				list-style: none;
+			}
+			button:focus,
+			input:focus {
+				outline: none;
+			}
+			button {
+				cursor: pointer;
+			}
+			img {
+				width: 100%;
+			}
+
+			main {
+				margin: 30px auto 0;
+				padding: 30px;
+				max-width: 640px;
+				height: 70vw;
+			}
+
+			.login {
+				display: none;
+				width: 100%;
+				height: 100%;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				gap: 3vw;
+			}
+			.login.active {
+				display: flex;
+			}
+			.login label {
+				font-size: 5vw;
+			}
+			.login input {
+				width: 80%;
+				height: 8vw;
+				padding: 0 10px;
+				font-size: 4vw;
+			}
+			.login button {
+				width: 15vw;
+				height: 8vw;
+				font-size: 4vw;
+			}
+
+			.town,
+			.heal,
+			.adventure {
+				display: none;
+				width: 100%;
+				height: 100%;
+				background: url(./img/rpg_village.jpg) no-repeat center/cover;
+				position: relative;
+			}
+			.town.active,
+			.heal.active,
+			.adventure.active {
+				display: block;
+			}
+			.town .user,
+			.heal .user {
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				width: 40vw;
+				margin-left: -20vw;
+			}
+
+			.town .menu {
+				position: absolute;
+				top: 0;
+				left: 0;
+				background: #eee;
+				border-bottom-right-radius: 10px;
+				overflow: hidden;
+			}
+			.town .menu li:not(:last-child) {
+				border-bottom: 1px solid #fff;
+			}
+			.town .menu li button {
+				width: 100%;
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 2;
+				border: none;
+				text-align: center;
+			}
+			.town .menu button:hover {
+				background: #ddd;
+			}
+			.town .info {
+				position: absolute;
+				top: 0;
+				right: 0;
+				background: #eee;
+				border-bottom-left-radius: 10px;
+				padding: 2vw 0;
+			}
+			.town .info li {
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 1.5;
+			}
+
+			.heal {
+				background-image: url(./img/rpg_bed.jpg);
+			}
+			.heal .heal_bar {
+				position: absolute;
+				top: 2vw;
+				left: 50%;
+				width: 90%;
+				height: 3vw;
+				margin-left: -45%;
+				background: #555;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+			.heal .heal_bar::after {
+				content: "";
+				display: block;
+				width: var(--healBar-width);
+				height: 100%;
+				background: red;
+				position: absolute;
+				top: 0;
+				left: 0;
+				transition: 0.4s;
+			}
+
+			.adventure {
+				background-image: url(./img/rpg_forest.jpg);
+			}
+			.adventure .menu {
+				position: absolute;
+				top: 5px;
+				right: 5px;
+				display: flex;
+				gap: 5px;
+			}
+			.adventure .menu button {
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 2;
+				border: 1px solid #fff;
+				text-align: center;
+				border-radius: 5px;
+			}
+			.adventure .menu button:hover {
+				background: #ddd;
+			}
+			.adventure .monster,
+			.adventure .user {
+				width: 25vw;
+				position: absolute;
+				bottom: 0;
+			}
+			.adventure .user {
+				right: 0;
+			}
+			.adventure .heal_bar {
+				content: "";
+				display: block;
+				position: absolute;
+				top: -2vw;
+				left: 50%;
+				transform: translate(-50%);
+				width: 50%;
+				height: 1vw;
+				background-color: #555;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+			.adventure .heal_bar::after {
+				content: "";
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				height: 100%;
+				background-color: red;
+			}
+			.adventure .user .heal_bar::after {
+				width: var(--userHealth-width);
+			}
+			.adventure .monster .heal_bar::after {
+				width: var(--monsterHealth-width);
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<form action="/" class="login active">
+				<label for="userName">사용자 이름을 입력해 주세요.</label>
+				<input type="text" name="userName" id="userName" />
+				<button type="submit">확인</button>
+			</form>
+
+			<form action="/" class="town">
+				<ul class="menu">
+					<li><button data-value="adventure">모험 떠나기</button></li>
+					<li><button data-value="heal">휴식 하기</button></li>
+					<li><button data-value="exit">게임 종료</button></li>
+				</ul>
+
+				<ul class="info">
+					<li>이름: <span id="name"></span></li>
+					<li>레벨: Lv<span id="level">1</span></li>
+					<li>체력: <span id="health">100</span>%</li>
+				</ul>
+
+				<div class="user">
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</form>
+
+			<div class="heal">
+				<div class="heal_bar"></div>
+				<div class="user">
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</div>
+
+			<form action="/" class="adventure">
+				<ul class="menu">
+					<li><button data-value="run">도망가기</button></li>
+					<li><button data-value="fight">싸우기</button></li>
+				</ul>
+
+				<div class="monster">
+					<div class="heal_bar"></div>
+					<img src="./img/rpg_monster.png" alt="몬스터 이미지" />
+				</div>
+
+				<div class="user">
+					<div class="heal_bar"></div>
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</form>
+
+			<script>
+				const $login = document.querySelector("form.login");
+				const $town = document.querySelector("form.town");
+				const $heal = document.querySelector(".heal");
+				const $adventure = document.querySelector("form.adventure");
+
+				const $userName = document.querySelector("#name");
+				const $userLevel = document.querySelector("#level");
+				const $userHealth = document.querySelector("#health");
+
+				let userName;
+				let clickable = true;
+				let monsterHealth = 100;
+
+				function setHealTime() {
+					let width = +$userHealth.innerText;
+					document.documentElement.style.setProperty(
+						"--healBar-width",
+						`${width}%`
+					);
+
+					const healing = setInterval(() => {
+						width = width + 10;
+						document.documentElement.style.setProperty(
+							"--healBar-width",
+							`${width}%`
+						);
+						$userHealth.textContent = width;
+
+						if (width >= 100) {
+							clearInterval(healing);
+							$heal.classList.remove("active");
+							$town.classList.add("active");
+						}
+					}, 200);
+				}
+
+				function fight() {
+					let userHealth = +$userHealth.innerText;
+
+					monsterHealth -= 10 * +$userLevel.innerText;
+					document.documentElement.style.setProperty(
+						"--monsterHealth-width",
+						`${monsterHealth}%`
+					);
+
+					const monsterTurn = setTimeout(() => {
+						userHealth -= 10;
+						document.documentElement.style.setProperty(
+							"--userHealth-width",
+							`${userHealth}%`
+						);
+						$userHealth.innerText = userHealth;
+						clickable = true;
+					}, 400);
+
+					if (userHealth === 0) {
+						const result = confirm(
+							"적에게 당했습니다. 마을로 돌아가시겠습니까?"
+						);
+						if (result) {
+							$town.classList.add("active");
+							$adventure.classList.remove("active");
+						}
+					} else if (monsterHealth === 0) {
+						clearTimeout(monsterTurn);
+						setTimeout(() => {
+							alert("적을 물리쳤습니다!. 레벨이 1 상승하였습니다");
+							$town.classList.add("active");
+							$adventure.classList.remove("active");
+							$userLevel.textContent = +$userLevel.innerText + 1;
+						}, 400);
+					}
+				}
+
+				$login.addEventListener("submit", (e) => {
+					e.preventDefault();
+
+					const target = e.target;
+					const targetValue = target.querySelector("input").value;
+
+					if (!targetValue) {
+						return;
+					}
+
+					userName = targetValue;
+					$userName.textContent = userName;
+					target.classList.remove("active");
+					$town.classList.add("active");
+					target.querySelector("input").value = "";
+				});
+
+				$town.addEventListener("click", (e) => {
+					e.preventDefault();
+
+					const targetValue = e.target.getAttribute("data-value");
+
+					if (targetValue === null) {
+						return;
+					}
+
+					if (targetValue === "adventure") {
+						// 모험 모드
+						$adventure.classList.add("active");
+					} else if (targetValue === "heal") {
+						// 힐링 모드
+						$heal.classList.add("active");
+						setHealTime();
+					} else if (targetValue === "exit") {
+						// 게임 종료
+						$login.classList.add("active");
+					}
+
+					$town.classList.remove("active");
+				});
+
+				$adventure.addEventListener("click", (e) => {
+					e.preventDefault();
+
+					const targetValue = e.target.getAttribute("data-value");
+
+					if (targetValue == null || !clickable) {
+						return;
+					}
+
+					if (targetValue === "run") {
+						$town.classList.add("active");
+						$adventure.classList.remove("active");
+					} else if (targetValue === "fight") {
+						clickable = false;
+						fight();
+					}
+				});
+			</script>
+		</main>
+	</body>
+</html>
