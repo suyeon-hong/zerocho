@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>텍스트 RPG</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			ul,
+			ol {
+				list-style: none;
+			}
+			button:focus,
+			input:focus {
+				outline: none;
+			}
+			button {
+				cursor: pointer;
+			}
+			img {
+				width: 100%;
+			}
+
+			main {
+				margin: 30px auto 0;
+				padding: 30px;
+				max-width: 640px;
+				height: 70vw;
+			}
+
+			.login {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				gap: 3vw;
+			}
+			.login label {
+				font-size: 5vw;
+			}
+			.login input {
+				width: 80%;
+				height: 8vw;
+				padding: 0 10px;
+				font-size: 4vw;
+			}
+			.login button {
+				width: 15vw;
+				height: 8vw;
+				font-size: 4vw;
+			}
+
+			.town,
+			.heal,
+			.adventure {
+				width: 100%;
+				height: 100%;
+				background: url(./img/rpg_village.jpg) no-repeat center/cover;
+				position: relative;
+			}
+			.town .character,
+			.heal .character {
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				width: 40vw;
+				margin-left: -20vw;
+			}
+
+			.town .menu {
+				position: absolute;
+				top: 0;
+				left: 0;
+				background: #eee;
+				border-bottom-right-radius: 10px;
+				overflow: hidden;
+			}
+			.town .menu li:not(:last-child) {
+				border-bottom: 1px solid #fff;
+			}
+			.town .menu li button {
+				width: 100%;
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 2;
+				border: none;
+				text-align: center;
+			}
+			.town .menu button:hover {
+				background: #ddd;
+			}
+			.town .info {
+				position: absolute;
+				top: 0;
+				right: 0;
+				background: #eee;
+				border-bottom-left-radius: 10px;
+				padding: 2vw 0;
+			}
+			.town .info li {
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 1.5;
+			}
+
+			.heal {
+				background-image: url(./img/rpg_bed.jpg);
+			}
+			.heal .heal_bar {
+				position: absolute;
+				top: 2vw;
+				left: 50%;
+				width: 90%;
+				height: 3vw;
+				margin-left: -45%;
+				background: #555;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+			.heal .heal_bar::after {
+				content: "";
+				display: block;
+				width: 0%;
+				height: 100%;
+				background: red;
+				position: absolute;
+				top: 0;
+				left: 0;
+				transition: 0.4s;
+			}
+
+			.adventure {
+				background-image: url(./img/rpg_forest.jpg);
+			}
+			.adventure .menu {
+				position: absolute;
+				top: 5px;
+				right: 5px;
+				display: flex;
+				gap: 5px;
+			}
+			.adventure .menu button {
+				padding: 0 3vw;
+				font-size: 3vw;
+				line-height: 2;
+				border: 1px solid #fff;
+				text-align: center;
+				border-radius: 5px;
+			}
+			.adventure .menu button:hover {
+				background: #ddd;
+			}
+			.adventure .monster,
+			.adventure .character {
+				width: 25vw;
+				position: absolute;
+				bottom: 0;
+			}
+			.adventure .character {
+				right: 0;
+			}
+			.adventure .heal_bar {
+				content: "";
+				display: block;
+				position: absolute;
+				top: -2vw;
+				left: 50%;
+				transform: translate(-50%);
+				width: 50%;
+				height: 1vw;
+				background-color: #555;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+			.adventure .heal_bar::after {
+				content: "";
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<form action="/" class="login">
+				<label for="userName">사용자 이름을 입력해 주세요.</label>
+				<input type="text" name="userName" id="userName" />
+				<button type="submit">확인</button>
+			</form>
+
+			<form action="/" class="town">
+				<ul class="menu">
+					<li><button>모험 떠나기</button></li>
+					<li><button>휴식 하기</button></li>
+					<li><button>게임 종료</button></li>
+				</ul>
+
+				<ul class="info">
+					<li>이름:</li>
+					<li>레벨: Lv1</li>
+					<li>체력: 100%</li>
+				</ul>
+
+				<div class="character">
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</form>
+
+			<div class="heal">
+				<div class="heal_bar"></div>
+				<div class="character">
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</div>
+
+			<form action="/" class="adventure">
+				<ul class="menu">
+					<li><button>도망가기</button></li>
+					<li><button>싸우기</button></li>
+				</ul>
+
+				<div class="monster">
+					<div class="heal_bar"></div>
+					<img src="./img/rpg_monster.png" alt="몬스터 이미지" />
+				</div>
+
+				<div class="character">
+					<div class="heal_bar"></div>
+					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
+				</div>
+			</form>
+		</main>
+	</body>
+</html>
