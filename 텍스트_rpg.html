@@ -35,13 +35,16 @@
 			}
 
 			.login {
+				display: none;
 				width: 100%;
 				height: 100%;
-				display: flex;
 				flex-direction: column;
 				justify-content: center;
 				align-items: center;
 				gap: 3vw;
+			}
+			.login.active {
+				display: flex;
 			}
 			.login label {
 				font-size: 5vw;
@@ -61,10 +64,16 @@
 			.town,
 			.heal,
 			.adventure {
+				display: none;
 				width: 100%;
 				height: 100%;
 				background: url(./img/rpg_village.jpg) no-repeat center/cover;
 				position: relative;
+			}
+			.town.active,
+			.heal.active,
+			.adventure.active {
+				display: block;
 			}
 			.town .character,
 			.heal .character {
@@ -194,7 +203,7 @@
 	</head>
 	<body>
 		<main>
-			<form action="/" class="login">
+			<form action="/" class="login active">
 				<label for="userName">사용자 이름을 입력해 주세요.</label>
 				<input type="text" name="userName" id="userName" />
 				<button type="submit">확인</button>
@@ -208,9 +217,9 @@
 				</ul>
 
 				<ul class="info">
-					<li>이름:</li>
-					<li>레벨: Lv1</li>
-					<li>체력: 100%</li>
+					<li>이름: <span id="name"></span></li>
+					<li>레벨: Lv<span id="level">1</span></li>
+					<li>체력: <span id="health">100</span>%</li>
 				</ul>
 
 				<div class="character">
@@ -241,6 +250,32 @@
 					<img src="./img/rpg_user.png" alt="캐릭터 이미지" />
 				</div>
 			</form>
+
+			<script>
+				const $login = document.querySelector("form.login");
+				const $town = document.querySelector("form.town");
+				const $heal = document.querySelector(".heal");
+				const $adventure = document.querySelector("form.adventure");
+
+				const $userName = document.querySelector("#name");
+
+				let userName;
+
+				$login.addEventListener("submit", (e) => {
+					e.preventDefault();
+
+					const targetValue = e.target.querySelector("input").value;
+
+					if (!targetValue) {
+						return;
+					}
+
+					userName = targetValue;
+					$userName.textContent = userName;
+					e.target.classList.remove("active");
+					$town.classList.add("active");
+				});
+			</script>
 		</main>
 	</body>
 </html>
