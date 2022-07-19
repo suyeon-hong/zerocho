@@ -277,6 +277,10 @@
 
 				function setHealTime() {
 					let width = +$userHealth.innerText;
+					document.documentElement.style.setProperty(
+						"--healBar-width",
+						`${width}%`
+					);
 
 					const healing = setInterval(() => {
 						width = width + 10;
@@ -284,6 +288,7 @@
 							"--healBar-width",
 							`${width}%`
 						);
+						$userHealth.textContent = width;
 
 						if (width >= 100) {
 							clearInterval(healing);
