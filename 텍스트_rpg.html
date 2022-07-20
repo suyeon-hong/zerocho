@@ -35,8 +35,8 @@
 			main {
 				margin: 30px auto 0;
 				padding: 30px;
-				max-width: 640px;
-				height: 70vw;
+				max-width: 1280px;
+				height: 54vw;
 			}
 
 			.login {
@@ -209,6 +209,12 @@
 			.adventure .monster .heal_bar::after {
 				width: var(--monsterHealth-width);
 			}
+
+			@media screen and (max-width: 768px) {
+				main {
+					height: 90vw;
+				}
+			}
 		</style>
 	</head>
 	<body>
@@ -230,6 +236,8 @@
 					<li>이름: <span id="name"></span></li>
 					<li>레벨: Lv<span id="level">1</span></li>
 					<li>체력: <span id="health">100</span>%</li>
+					<li>경험치: <span id="xp">0</span>/<span id="max-xp">15</span></li>
+					<li>공격력: <span id="att">15</span></li>
 				</ul>
 
 				<div class="user">
@@ -247,6 +255,7 @@
 			<form action="/" class="adventure">
 				<ul class="menu">
 					<li><button data-value="run">도망가기</button></li>
+					<li><button data-value="heal">회복하기</button></li>
 					<li><button data-value="fight">싸우기</button></li>
 				</ul>
 
@@ -266,74 +275,104 @@
 				const $town = document.querySelector("form.town");
 				const $heal = document.querySelector(".heal");
 				const $adventure = document.querySelector("form.adventure");
+				const $monsterImg = document.querySelector(".monster img");
 
 				const $userName = document.querySelector("#name");
 				const $userLevel = document.querySelector("#level");
 				const $userHealth = document.querySelector("#health");
+				const $userXp = document.querySelector("#xp");
+				const $userMaxXp = document.querySelector("#max-xp");
+				const $userAtt = document.querySelector("#att");
 
-				let userName;
+				const user = {
+					name: "",
+					level: 1,
+					health: 100,
+					maxXp: 15,
+					xp: 0,
+					att: 3,
+				};
+				const monsterList = [
+					{
+						name: "monster",
+						health: 100,
+						xp: 15 * user.level,
+						att: 5,
+					},
+					{
+						name: "monster2",
+						health: 100,
+						xp: 20 * user.level,
+						att: 10,
+					},
+					{
+						name: "monster3",
+						health: 100,
+						xp: 10 * user.level,
+						att: 3,
+					},
+				];
+
+				let monster;
 				let clickable = true;
 				let monsterHealth = 100;
 
-				function setHealTime() {
-					let width = +$userHealth.innerText;
+				function setHealTime(onetime = false) {
 					document.documentElement.style.setProperty(
 						"--healBar-width",
-						`${width}%`
+						`${user.health}%`
 					);
 
 					const healing = setInterval(() => {
-						width = width + 10;
+						user.health = Math.min(100, user.health + (onetime ? 50 : 10));
 						document.documentElement.style.setProperty(
 							"--healBar-width",
-							`${width}%`
+							`${user.health}%`
 						);
-						$userHealth.textContent = width;
+						$userHealth.textContent = user.health;
 
-						if (width >= 100) {
+						if (onetime) {
+							clearInterval(healing);
+							$heal.classList.remove("active");
+							$adventure.classList.add("active");
+							return;
+						}
+						if (user.health >= 100) {
 							clearInterval(healing);
 							$heal.classList.remove("active");
 							$town.classList.add("active");
+							return;
 						}
 					}, 200);
 				}
 
-				function fight() {
-					let userHealth = +$userHealth.innerText;
-
-					monsterHealth -= 10 * +$userLevel.innerText;
-					document.documentElement.style.setProperty(
-						"--monsterHealth-width",
-						`${monsterHealth}%`
-					);
-
-					const monsterTurn = setTimeout(() => {
-						userHealth -= 10;
+				function attack(target) {
+					if (target === "user") {
+						user.health = Math.max(0, user.health - monster.att);
 						document.documentElement.style.setProperty(
 							"--userHealth-width",
-							`${userHealth}%`
+							`${user.health}%`
 						);
-						$userHealth.innerText = userHealth;
+						$userHealth.innerText = user.health;
 						clickable = true;
-					}, 400);
-
-					if (userHealth === 0) {
-						const result = confirm(
-							"적에게 당했습니다. 마을로 돌아가시겠습니까?"
+					} else if (target === "monster") {
+						monster.health = Math.max(0, monster.health - user.att);
+						document.documentElement.style.setProperty(
+							"--monsterHealth-width",
+							`${monster.health}%`
 						);
-						if (result) {
-							$town.classList.add("active");
-							$adventure.classList.remove("active");
-						}
-					} else if (monsterHealth === 0) {
-						clearTimeout(monsterTurn);
-						setTimeout(() => {
-							alert("적을 물리쳤습니다!. 레벨이 1 상승하였습니다");
-							$town.classList.add("active");
-							$adventure.classList.remove("active");
-							$userLevel.textContent = +$userLevel.innerText + 1;
-						}, 400);
 					}
+				}
+
+				function setMonster() {
+					monster = JSON.parse(
+						JSON.stringify(monsterList[+Math.floor(Math.random() * 2 + 1)])
+					);
+					$monsterImg.setAttribute("src", `./img/rpg_${monster.name}.png`);
+					document.documentElement.style.setProperty(
+						"--monsterHealth-width",
+						`${monster.health}%`
+					);
 				}
 
 				$login.addEventListener("submit", (e) => {
@@ -346,8 +385,8 @@
 						return;
 					}
 
-					userName = targetValue;
-					$userName.textContent = userName;
+					user.name = targetValue;
+					$userName.textContent = user.name;
 					target.classList.remove("active");
 					$town.classList.add("active");
 					target.querySelector("input").value = "";
@@ -365,6 +404,8 @@
 					if (targetValue === "adventure") {
 						// 모험 모드
 						$adventure.classList.add("active");
+						setMonster();
+						clickable = true;
 					} else if (targetValue === "heal") {
 						// 힐링 모드
 						$heal.classList.add("active");
@@ -387,11 +428,55 @@
 					}
 
 					if (targetValue === "run") {
+						// 도망가기
 						$town.classList.add("active");
 						$adventure.classList.remove("active");
+					} else if (targetValue === "heal") {
+						// 회복하기
+						setHealTime(true);
+						$heal.classList.add("active");
+						$adventure.classList.remove("active");
+						setTimeout(() => attack("user"), 200);
 					} else if (targetValue === "fight") {
+						// 싸우기
 						clickable = false;
-						fight();
+						attack("monster");
+						const userAttack = setTimeout(() => attack("user"), 200);
+
+						if (user.health <= 0) {
+							alert("적에게 당했습니다. 마을로 돌아갑니다.");
+							$town.classList.add("active");
+							$adventure.classList.remove("active");
+						} else if (monster.health <= 0) {
+							clearTimeout(userAttack);
+							setTimeout(() => {
+								const goTown = confirm(
+									`적을 물리치고 공격력: ${monster.xp}, 경험치: ${monster.att}가 상승하였습니다. \n마을로 돌아가시겠습니까?`
+								);
+
+								user.att += monster.xp;
+								user.xp += monster.att;
+
+								if (goTown) {
+									$town.classList.add("active");
+									$adventure.classList.remove("active");
+								} else {
+									setMonster();
+									clickable = true;
+								}
+
+								if (user.xp >= user.maxXp) {
+									user.level += 1;
+									user.xp = user.maxXp - user.xp;
+									user.maxXp += 15;
+								}
+
+								$userLevel.textContent = user.level;
+								$userXp.textContent = user.xp;
+								$userMaxXp.textContent = user.maxXp;
+								$userAtt.textContent = user.att;
+							}, 400);
+						}
 					}
 				});
 			</script>
