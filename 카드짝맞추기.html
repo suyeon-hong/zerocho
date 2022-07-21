@@ -155,6 +155,7 @@
 			let clickable = false;
 			let prevColor;
 			let prevTarget;
+			let startTime;
 
 			const colors = [
 				"orange",
@@ -182,8 +183,9 @@
 			$card_container.addEventListener("click", (e) => {
 				const target = e.target.closest(".card_inner");
 
-				if (target == null || !clickable || target.classList.contains("isOn"))
+				if (target == null || !clickable || target.classList.contains("isOn")) {
 					return;
+				}
 
 				target.classList.add("isOn");
 
@@ -207,8 +209,10 @@
 					clickable = true;
 
 					if (gameFinished()) {
+						const finishTime = new Date().getTime();
+						const result = Math.floor((finishTime - startTime) / 1000);
 						const p = document.createElement("p");
-						p.textContent = "성공!";
+						p.textContent = `성공! ${result}초 걸렸어요.`;
 
 						$main.append(p);
 					}
@@ -221,6 +225,7 @@
 				setTimeout(() => {
 					$card_container.classList.remove("start");
 					clickable = true;
+					startTime = new Date().getTime();
 				}, 3000);
 			}
 
