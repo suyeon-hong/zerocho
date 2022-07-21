@@ -49,6 +49,7 @@
 			display: flex;
 			gap: 1vw;
 			flex-wrap: wrap;
+			margin-bottom: 20px;
 		}
 		.card_wrap {
 			width: calc((100% - 3vw) / 4);
@@ -111,6 +112,12 @@
 			background: green;
 		}
 
+		p {
+			font-size: 28px;
+			font-weight: bold;
+			color: tomato;
+		}
+
 		@media screen and (max-width: 768px) {
 			.card_container {
 				width: 100%;
@@ -140,11 +147,15 @@
 		</main>
 
 		<script>
-			const $card_container = document.querySelector(".card_container");
-			const btnStart = document.querySelector(".btnStart");
+			const $main = document.querySelector("main");
+			const $card_container = $main.querySelector(".card_container");
+			const $btnStart = $main.querySelector(".btnStart");
 
 			let gameStarted = false;
-			let cardList = [];
+			let clickable = false;
+			let prevColor;
+			let prevTarget;
+
 			const colors = [
 				"orange",
 				"blue",
@@ -161,11 +172,46 @@
 			];
 			const randomColors = [];
 
-			btnStart.addEventListener("click", () => {
+			$btnStart.addEventListener("click", () => {
 				if (gameStarted) return;
 
 				startGame();
 				gameStarted = true;
+			});
+
+			$card_container.addEventListener("click", (e) => {
+				const target = e.target.closest(".card_inner");
+
+				if (target == null || !clickable) return;
+
+				target.classList.add("isOn");
+
+				const targetColor = target.getAttribute("data-color");
+				if (!prevColor) {
+					prevColor = targetColor;
+					prevTarget = target;
+					return;
+				}
+
+				clickable = false;
+
+				setTimeout(() => {
+					if (targetColor !== prevColor) {
+						target.classList.remove("isOn");
+						prevTarget.classList.remove("isOn");
+					}
+
+					prevColor = null;
+					prevTarget = null;
+					clickable = true;
+
+					if (gameFinished()) {
+						const p = document.createElement("p");
+						p.textContent = "성공!";
+
+						$main.append(p);
+					}
+				}, 800);
 			});
 
 			function startGame() {
@@ -173,6 +219,7 @@
 				$card_container.classList.add("start");
 				setTimeout(() => {
 					$card_container.classList.remove("start");
+					clickable = true;
 				}, 3000);
 			}
 
@@ -188,7 +235,7 @@
 					li.className = "card_wrap";
 
 					li.innerHTML = `
-						<div class="card_inner">
+						<div class="card_inner" data-color="${col}">
 							<div class="front ${col}"></div>
 							<div class="back"></div>
 						</div>
@@ -196,6 +243,14 @@
 
 					$card_container.append(li);
 				});
+			}
+
+			function gameFinished() {
+				const totalLen = $card_container.querySelectorAll(".card_inner").length;
+				const successLen =
+					$card_container.querySelectorAll(".card_inner.isOn").length;
+
+				return totalLen === successLen;
 			}
 		</script>
 	</body>
