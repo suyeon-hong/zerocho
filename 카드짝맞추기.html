@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>카드 짝맞추기</title>
+	</head>
+
+	<style>
+		* {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+		}
+		ul {
+			list-style: none;
+		}
+
+		main {
+			margin: 0 auto;
+			padding: 30px;
+		}
+
+		h1 {
+			font-size: 28px;
+			margin-bottom: 1px;
+		}
+		.noti {
+			padding-left: 20px;
+			margin-bottom: 20px;
+		}
+		.noti li {
+			font-size: 13px;
+			line-height: 1.2;
+			color: #888;
+		}
+
+		.btnStart {
+			width: 100px;
+			height: 40px;
+			font-size: 18px;
+			cursor: pointer;
+			margin-bottom: 20px;
+		}
+
+		.card_container {
+			width: 70%;
+			display: flex;
+			gap: 1vw;
+			flex-wrap: wrap;
+			margin-bottom: 20px;
+		}
+		.card_wrap {
+			width: calc((100% - 3vw) / 4);
+			height: 200px;
+		}
+		.card_inner {
+			width: 100%;
+			height: 100%;
+			position: relative;
+			cursor: pointer;
+			perspective: 500px;
+		}
+		.front,
+		.back {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+			backface-visibility: hidden;
+			transition: 1s;
+		}
+		.front {
+			transform: rotateY(-180deg);
+		}
+		.back {
+			transform: rotateY(0deg);
+			background: #555;
+		}
+
+		.start .card_inner .front {
+			transform: rotateY(0deg);
+		}
+		.start .card_inner .back {
+			transform: rotateY(180deg);
+		}
+		.card_inner.isOn .front {
+			transform: rotateY(0deg);
+		}
+		.card_inner.isOn .back {
+			transform: rotateY(180deg);
+		}
+
+		.front.red {
+			background: red;
+		}
+		.front.orange {
+			background: orange;
+		}
+		.front.blue {
+			background: blue;
+		}
+		.front.yellow {
+			background: yellow;
+		}
+		.front.pink {
+			background: pink;
+		}
+		.front.green {
+			background: green;
+		}
+
+		p {
+			font-size: 28px;
+			font-weight: bold;
+			color: tomato;
+		}
+
+		@media screen and (max-width: 768px) {
+			.card_container {
+				width: 100%;
+				gap: 2vw;
+			}
+
+			.card_wrap {
+				width: calc((100% - 6vw) / 4);
+				height: 130px;
+			}
+		}
+	</style>
+	<body>
+		<main>
+			<h1>카드 짝맞추기 게임</h1>
+
+			<ol class="noti">
+				<li>게임시작 버튼을 눌러 게임을 시작해 주세요.</li>
+				<li>3초간 보여지는 카드의 순서를 잘 기억해 주세요.</li>
+				<li>같은 색을 가진 2장의 카드를 선택해 주세요.</li>
+				<li>12장의 카드가 모두 짝을 이루면 성공입니다.</li>
+			</ol>
+
+			<button class="btnStart">게임시작</button>
+
+			<ul class="card_container"></ul>
+		</main>
+
+		<script>
+			const $main = document.querySelector("main");
+			const $card_container = $main.querySelector(".card_container");
+			const $btnStart = $main.querySelector(".btnStart");
+
+			let gameStarted = false;
+			let clickable = false;
+			let prevColor;
+			let prevTarget;
+			let startTime;
+
+			const colors = [
+				"orange",
+				"blue",
+				"yellow",
+				"pink",
+				"green",
+				"red",
+				"orange",
+				"blue",
+				"yellow",
+				"pink",
+				"green",
+				"red",
+			];
+			const randomColors = [];
+
+			$btnStart.addEventListener("click", () => {
+				if (gameStarted) return;
+
+				startGame();
+				gameStarted = true;
+			});
+
+			$card_container.addEventListener("click", (e) => {
+				const target = e.target.closest(".card_inner");
+
+				if (target == null || !clickable || target.classList.contains("isOn")) {
+					return;
+				}
+
+				target.classList.add("isOn");
+
+				const targetColor = target.getAttribute("data-color");
+				if (!prevColor) {
+					prevColor = targetColor;
+					prevTarget = target;
+					return;
+				}
+
+				clickable = false;
+
+				setTimeout(() => {
+					if (targetColor !== prevColor) {
+						target.classList.remove("isOn");
+						prevTarget.classList.remove("isOn");
+					}
+
+					prevColor = null;
+					prevTarget = null;
+					clickable = true;
+
+					if (gameFinished()) {
+						const finishTime = new Date().getTime();
+						const result = Math.floor((finishTime - startTime) / 1000);
+						const p = document.createElement("p");
+						p.textContent = `성공! ${result}초 걸렸어요.`;
+
+						$main.append(p);
+					}
+				}, 800);
+			});
+
+			function startGame() {
+				makeRandomCard();
+				$card_container.classList.add("start");
+				setTimeout(() => {
+					$card_container.classList.remove("start");
+					clickable = true;
+					startTime = new Date().getTime();
+				}, 3000);
+			}
+
+			function makeRandomCard() {
+				while (colors.length > 0) {
+					const randomI = Math.floor(Math.random() * colors.length);
+					randomColors.push(colors[randomI]);
+					colors.splice(randomI, 1);
+				}
+
+				randomColors.map((col, i) => {
+					const li = document.createElement("li");
+					li.className = "card_wrap";
+
+					li.innerHTML = `
+						<div class="card_inner" data-color="${col}">
+							<div class="front ${col}"></div>
+							<div class="back"></div>
+						</div>
+					`;
+
+					$card_container.append(li);
+				});
+			}
+
+			function gameFinished() {
+				const totalLen = $card_container.querySelectorAll(".card_inner").length;
+				const successLen =
+					$card_container.querySelectorAll(".card_inner.isOn").length;
+
+				return totalLen === successLen;
+			}
+		</script>
+	</body>
+</html>
