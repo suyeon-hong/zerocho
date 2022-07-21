@@ -182,7 +182,8 @@
 			$card_container.addEventListener("click", (e) => {
 				const target = e.target.closest(".card_inner");
 
-				if (target == null || !clickable) return;
+				if (target == null || !clickable || target.classList.contains("isOn"))
+					return;
 
 				target.classList.add("isOn");
 
