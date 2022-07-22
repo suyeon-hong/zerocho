@@ -43,6 +43,8 @@
 			width: 50px;
 			height: 50px;
 			border: 1px solid #222;
+			font-size: 20px;
+			text-align: center;
 			cursor: pointer;
 		}
 		#field td.empty:hover {
@@ -82,7 +84,7 @@
 			const $result = document.createElement("p");
 
 			// const row = +prompt("몇 칸으로 진행할까요?", 0);
-			const row = 5;
+			const row = 10;
 			const cell = row;
 			const mine = row;
 
@@ -98,6 +100,54 @@
 				QUESTION_MINE: -5,
 				FLAG_MINE: -6,
 			};
+
+			makeField();
+
+			$tbody.addEventListener("contextmenu", (e) => {
+				e.preventDefault();
+				const rowIdx = e.target.closest("tr").rowIndex;
+				const cellIdx = e.target.cellIndex;
+
+				let targetValue = fieldData[rowIdx][cellIdx];
+
+				if (targetValue === CODE.NORMAL) {
+					fieldData[rowIdx][cellIdx] = CODE.QUESTION;
+					changeTo("question", e.target);
+				} else if (targetValue === CODE.QUESTION) {
+					fieldData[rowIdx][cellIdx] = CODE.FLAG;
+					changeTo("flag", e.target);
+				} else if (targetValue === CODE.FLAG) {
+					fieldData[rowIdx][cellIdx] = CODE.NORMAL;
+					changeTo("normal", e.target);
+				} else if (targetValue === CODE.MINE) {
+					fieldData[rowIdx][cellIdx] = CODE.QUESTION_MINE;
+					changeTo("question", e.target);
+				} else if (targetValue === CODE.QUESTION_MINE) {
+					fieldData[rowIdx][cellIdx] = CODE.FLAG_MINE;
+					changeTo("flag", e.target);
+				} else if (targetValue === CODE.FLAG_MINE) {
+					fieldData[rowIdx][cellIdx] = CODE.MINE;
+					changeTo("normal", e.target);
+				}
+			});
+
+			function changeTo(codeName, target) {
+				const targetClassList = target.classList;
+
+				if (codeName === "question") {
+					targetClassList.add("question");
+					target.textContent = "?";
+					targetClassList.remove("empty");
+				} else if (codeName === "flag") {
+					targetClassList.remove("question");
+					targetClassList.add("flag");
+					target.textContent = "!";
+				} else if (codeName === "normal") {
+					targetClassList.remove("flag");
+					target.textContent = "";
+					targetClassList.add("empty");
+				}
+			}
 
 			function setFieldData() {
 				for (let i = 0; i < row; i++) {
@@ -140,17 +190,15 @@
 						const $td = document.createElement("td");
 
 						if (fieldData[i][j] === -4) {
-							$td.className = "flag";
-						} else {
-							$td.className = "empty";
+							$td.textContent = "X";
 						}
+
+						$td.className = "empty";
 						$tr.append($td);
 					}
 					$tbody.append($tr);
 				}
 			}
-
-			makeField();
 		</script>
 	</body>
 </html>
