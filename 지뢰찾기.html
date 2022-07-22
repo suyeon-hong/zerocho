@@ -53,7 +53,7 @@
 		#field td.empty {
 			background: #fff;
 		}
-		#field td.opend {
+		#field td.opened {
 			background: #ddd;
 		}
 		#field td.flag {
@@ -84,12 +84,15 @@
 			const $result = document.createElement("p");
 
 			// const row = +prompt("몇 칸으로 진행할까요?", 0);
-			const row = 10;
+			const row = 5;
 			const cell = row;
 			const mine = row;
 
 			const fieldData = [];
 			const minePos = [];
+			let totalCount = 0;
+			let startTime;
+			let timer;
 
 			const CODE = {
 				OPENED: 0,
@@ -101,9 +104,87 @@
 				FLAG_MINE: -6,
 			};
 
-			makeField();
+			const handleLeftClick = (e) => {
+				if (e.target.nodeName !== "TD") return;
 
-			$tbody.addEventListener("contextmenu", (e) => {
+				if (!startTime) startTime = new Date();
+
+				const rowIdx = e.target.closest("tr").rowIndex;
+				const cellIdx = e.target.cellIndex;
+
+				const target = fieldData[rowIdx][cellIdx];
+
+				if (target === CODE.NORMAL) {
+					openAround(rowIdx, cellIdx);
+				} else if (target === CODE.MINE) {
+					e.target.textContent = "펑";
+					e.target.classList.add("opened");
+					$tbody.removeEventListener("contextmenu", handleRightClick);
+					$tbody.removeEventListener("click", handleLeftClick);
+				}
+			};
+
+			const openAround = (rowIdx, cellIdx) => {
+				const count = open(rowIdx, cellIdx);
+
+				if (count === 0) {
+					setTimeout(() => {
+						openAround(rowIdx - 1, cellIdx);
+						openAround(rowIdx - 1, cellIdx - 1);
+						openAround(rowIdx - 1, cellIdx + 1);
+						openAround(rowIdx, cellIdx - 1);
+						openAround(rowIdx, cellIdx + 1);
+						openAround(rowIdx, cellIdx);
+						openAround(rowIdx + 1, cellIdx);
+						openAround(rowIdx + 1, cellIdx - 1);
+						openAround(rowIdx + 1, cellIdx + 1);
+					}, 0);
+				}
+			};
+
+			const open = (rI, cI) => {
+				const target = $tbody.children[rI]?.children[cI];
+				if (!target) return;
+
+				if (fieldData[rI][cI] > CODE.NORMAL) return;
+
+				const count = countMine(rI, cI);
+
+				target.textContent = count || "";
+				fieldData[rI][cI] = count;
+				target.classList.add("opened");
+
+				totalCount++;
+
+				if (totalCount === row * cell - mine) {
+					$tbody.removeEventListener("contextmenu", handleRightClick);
+					$tbody.removeEventListener("click", handleLeftClick);
+					const playTime = Math.floor((new Date() - startTime) / 1000);
+
+					setTimeout(() => {
+						alert(`성공! ${playTime}초 걸렸어요.`);
+					});
+				}
+				return count;
+			};
+
+			const countMine = (row, cell) => {
+				const mine = [CODE.MINE, CODE.QUESTION_MINE, CODE.FLAG_MINE];
+				let mineNum = 0;
+
+				if (mine.includes(fieldData[row - 1]?.[cell])) mineNum++;
+				if (mine.includes(fieldData[row - 1]?.[cell - 1])) mineNum++;
+				if (mine.includes(fieldData[row - 1]?.[cell + 1])) mineNum++;
+				if (mine.includes(fieldData[row][cell - 1])) mineNum++;
+				if (mine.includes(fieldData[row][cell + 1])) mineNum++;
+				if (mine.includes(fieldData[row + 1]?.[cell])) mineNum++;
+				if (mine.includes(fieldData[row + 1]?.[cell + 1])) mineNum++;
+				if (mine.includes(fieldData[row + 1]?.[cell - 1])) mineNum++;
+
+				return mineNum;
+			};
+
+			const handleRightClick = (e) => {
 				e.preventDefault();
 				const rowIdx = e.target.closest("tr").rowIndex;
 				const cellIdx = e.target.cellIndex;
@@ -129,9 +210,9 @@
 					fieldData[rowIdx][cellIdx] = CODE.MINE;
 					changeTo("normal", e.target);
 				}
-			});
+			};
 
-			function changeTo(codeName, target) {
+			const changeTo = (codeName, target) => {
 				const targetClassList = target.classList;
 
 				if (codeName === "question") {
@@ -147,9 +228,9 @@
 					target.textContent = "";
 					targetClassList.add("empty");
 				}
-			}
+			};
 
-			function setFieldData() {
+			const setFieldData = () => {
 				for (let i = 0; i < row; i++) {
 					fieldData[i] = [];
 					for (let j = 0; j < cell; j++) {
@@ -157,9 +238,9 @@
 					}
 				}
 				setMine();
-			}
+			};
 
-			function setMine() {
+			const setMine = () => {
 				for (let i = 0; i < mine; i++) {
 					const randomNum = Math.floor(Math.random() * row * cell);
 
@@ -177,12 +258,11 @@
 
 					fieldData[rowIndex][cellIndex] = CODE.MINE;
 				});
-			}
+			};
 
-			function makeField() {
+			const makeField = () => {
 				setFieldData();
 
-				console.log(fieldData);
 				for (let i = 0; i < fieldData.length; i++) {
 					const $tr = document.createElement("tr");
 
@@ -198,7 +278,12 @@
 					}
 					$tbody.append($tr);
 				}
-			}
+			};
+
+			makeField();
+
+			$tbody.addEventListener("contextmenu", handleRightClick);
+			$tbody.addEventListener("click", handleLeftClick);
 		</script>
 	</body>
 </html>
