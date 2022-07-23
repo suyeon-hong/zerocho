@@ -160,6 +160,14 @@
 
 				const target = fieldData[rowIdx][cellIdx];
 
+				if (totalCount === 0 && target === CODE.MINE) {
+					fieldData = [];
+					minePos = [];
+					setFieldData();
+					e.target.click();
+					return;
+				}
+
 				if (target === CODE.NORMAL) {
 					openAround(rowIdx, cellIdx);
 				} else if (target === CODE.MINE) {
@@ -323,6 +331,9 @@
 					for (let j = 0; j < fieldData[i].length; j++) {
 						const $td = document.createElement("td");
 
+						if (fieldData[i][j] === CODE.MINE) {
+							$td.textContent = "X";
+						}
 						$td.className = "empty";
 						$tr.append($td);
 					}
