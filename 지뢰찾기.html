@@ -331,9 +331,6 @@
 					for (let j = 0; j < fieldData[i].length; j++) {
 						const $td = document.createElement("td");
 
-						if (fieldData[i][j] === CODE.MINE) {
-							$td.textContent = "X";
-						}
 						$td.className = "empty";
 						$tr.append($td);
 					}
