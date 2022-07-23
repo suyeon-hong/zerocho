@@ -13,6 +13,9 @@
 			margin: 0;
 			box-sizing: border-box;
 		}
+		input:focus {
+			outline: none;
+		}
 
 		main {
 			margin: 0 auto;
@@ -32,6 +35,21 @@
 			font-size: 13px;
 			line-height: 1.2;
 			color: #666;
+		}
+
+		#form {
+			font-size: 14px;
+			margin-bottom: 20px;
+		}
+		#form input {
+			width: 50px;
+			height: 26px;
+		}
+		#form button {
+			width: 50px;
+			height: 26px;
+			vertical-align: bottom;
+			cursor: pointer;
 		}
 
 		#field {
@@ -62,17 +80,32 @@
 		#field td.question {
 			background: orange;
 		}
+		#field td.mine {
+			background: blue;
+			color: #fff;
+		}
 	</style>
 	<body>
 		<main>
 			<h1>지뢰찾기</h1>
 
 			<ol class="noti">
+				<li>가로칸, 세로칸, 지뢰의 갯수를 설정해주세요.</li>
 				<li>지뢰가 없는 땅을 클릭하면 땅이 열립니다.</li>
 				<li>지뢰가 있는 땅을 클릭할경우 게임이 종료됩니다.(실패)</li>
 				<li>지뢰가 있을거라고 예상되는 곳은 마우스 오른쪽 클릭을 해주세요.</li>
 				<li>지뢰를 피해 땅을 모두 열게되면 게임이 종료됩니다.(성공)</li>
 			</ol>
+
+			<form action="/" id="form">
+				<label for="row">가로칸: </label>
+				<input type="text" pattern="[0-9]+" id="row" />
+				<label for="cell">세로칸: </label>
+				<input type="text" pattern="[0-9]+" id="cell" />
+				<label for="mine">지뢰: </label>
+				<input type="text" pattern="[0-9]+" id="mine" />
+				<button type="submit">확인</button>
+			</form>
 
 			<table id="field">
 				<tbody></tbody>
@@ -82,17 +115,21 @@
 		<script>
 			const $tbody = document.querySelector("#field tbody");
 			const $result = document.createElement("p");
+			const $form = document.querySelector("#form");
+			const $row = document.querySelector("#row");
+			const $cell = document.querySelector("#cell");
+			const $mine = document.querySelector("#mine");
 
-			// const row = +prompt("몇 칸으로 진행할까요?", 0);
-			const row = 5;
-			const cell = row;
-			const mine = row;
+			let row;
+			let cell;
+			let mine;
 
-			const fieldData = [];
-			const minePos = [];
+			let fieldData = [];
+			let minePos = [];
 			let totalCount = 0;
 			let startTime;
 			let timer;
+			let gameStarted = false;
 
 			const CODE = {
 				OPENED: 0,
@@ -107,8 +144,6 @@
 			const handleLeftClick = (e) => {
 				if (e.target.nodeName !== "TD") return;
 
-				if (!startTime) startTime = new Date();
-
 				const rowIdx = e.target.closest("tr").rowIndex;
 				const cellIdx = e.target.cellIndex;
 
@@ -121,6 +156,11 @@
 					e.target.classList.add("opened");
 					$tbody.removeEventListener("contextmenu", handleRightClick);
 					$tbody.removeEventListener("click", handleLeftClick);
+					gameStarted = false;
+
+					setTimeout(() => {
+						alert(`실패`);
+					}, 0);
 				}
 			};
 
@@ -159,11 +199,12 @@
 				if (totalCount === row * cell - mine) {
 					$tbody.removeEventListener("contextmenu", handleRightClick);
 					$tbody.removeEventListener("click", handleLeftClick);
+					gameStarted = false;
 					const playTime = Math.floor((new Date() - startTime) / 1000);
 
 					setTimeout(() => {
 						alert(`성공! ${playTime}초 걸렸어요.`);
-					});
+					}, 100);
 				}
 				return count;
 			};
@@ -234,7 +275,7 @@
 				for (let i = 0; i < row; i++) {
 					fieldData[i] = [];
 					for (let j = 0; j < cell; j++) {
-						fieldData[i].push(CODE.NORMAL);
+						fieldData[i][j] = CODE.NORMAL;
 					}
 				}
 				setMine();
@@ -269,10 +310,6 @@
 					for (let j = 0; j < fieldData[i].length; j++) {
 						const $td = document.createElement("td");
 
-						if (fieldData[i][j] === -4) {
-							$td.textContent = "X";
-						}
-
 						$td.className = "empty";
 						$tr.append($td);
 					}
@@ -280,10 +317,29 @@
 				}
 			};
 
-			makeField();
+			const gameStart = (e) => {
+				e.preventDefault();
 
-			$tbody.addEventListener("contextmenu", handleRightClick);
-			$tbody.addEventListener("click", handleLeftClick);
+				if (gameStarted) return;
+
+				gameStarted = true;
+				fieldData = [];
+				minePos = [];
+				totalCount = 0;
+				startTime = new Date();
+
+				row = +$row.value;
+				cell = +$cell.value;
+				mine = +$mine.value;
+
+				$tbody.innerHTML = "";
+				makeField();
+
+				$tbody.addEventListener("contextmenu", handleRightClick);
+				$tbody.addEventListener("click", handleLeftClick);
+			};
+
+			$form.addEventListener("submit", gameStart);
 		</script>
 	</body>
 </html>
