@@ -52,6 +52,14 @@
 			cursor: pointer;
 		}
 
+		.result {
+			margin-bottom: 20px;
+			font-size: 15px;
+			min-width: 30px;
+			text-align: right;
+			display: inline-block;
+		}
+
 		#field {
 			width: 100%;
 			display: flex;
@@ -107,6 +115,8 @@
 				<button type="submit">확인</button>
 			</form>
 
+			<p class="result"><span id="result">0</span>초</p>
+
 			<table id="field">
 				<tbody></tbody>
 			</table>
@@ -114,7 +124,7 @@
 
 		<script>
 			const $tbody = document.querySelector("#field tbody");
-			const $result = document.createElement("p");
+			const $result = document.querySelector("#result");
 			const $form = document.querySelector("#form");
 			const $row = document.querySelector("#row");
 			const $cell = document.querySelector("#cell");
@@ -130,6 +140,7 @@
 			let startTime;
 			let timer;
 			let gameStarted = false;
+			let playTimer;
 
 			const CODE = {
 				OPENED: 0,
@@ -157,6 +168,7 @@
 					$tbody.removeEventListener("contextmenu", handleRightClick);
 					$tbody.removeEventListener("click", handleLeftClick);
 					gameStarted = false;
+					clearInterval(playTimer);
 
 					setTimeout(() => {
 						alert(`실패`);
@@ -201,6 +213,7 @@
 					$tbody.removeEventListener("click", handleLeftClick);
 					gameStarted = false;
 					const playTime = Math.floor((new Date() - startTime) / 1000);
+					clearInterval(playTimer);
 
 					setTimeout(() => {
 						alert(`성공! ${playTime}초 걸렸어요.`);
@@ -272,9 +285,9 @@
 			};
 
 			const setFieldData = () => {
-				for (let i = 0; i < row; i++) {
-					fieldData[i] = [];
-					for (let j = 0; j < cell; j++) {
+				for (let i = 0; i < cell; i++) {
+					fieldData.push([]);
+					for (let j = 0; j < row; j++) {
 						fieldData[i][j] = CODE.NORMAL;
 					}
 				}
@@ -317,6 +330,14 @@
 				}
 			};
 
+			const countPlayTime = () => {
+				let sec = 0;
+
+				playTimer = setInterval(() => {
+					$result.textContent = ++sec;
+				}, 1000);
+			};
+
 			const gameStart = (e) => {
 				e.preventDefault();
 
@@ -327,13 +348,17 @@
 				minePos = [];
 				totalCount = 0;
 				startTime = new Date();
+				clearInterval(playTimer);
 
 				row = +$row.value;
 				cell = +$cell.value;
 				mine = +$mine.value;
 
+				$result.textContent = 0;
 				$tbody.innerHTML = "";
 				makeField();
+
+				countPlayTime();
 
 				$tbody.addEventListener("contextmenu", handleRightClick);
 				$tbody.addEventListener("click", handleLeftClick);
