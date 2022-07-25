@@ -41,6 +41,7 @@
 				max-width: 60vw;
 				border-collapse: collapse;
 				user-select: none;
+				cursor: pointer;
 			}
 
 			#field td {
@@ -50,8 +51,7 @@
 				line-height: 3;
 				text-align: center;
 				width: calc(100% / 4);
-				height: 22vw;
-				cursor: pointer;
+				height: 22.4vw;
 				border: 10px solid #bbada0;
 			}
 
@@ -126,17 +126,16 @@
 				<li>게임을 진행하며 칸이 다 채워지기 전, 2048을 만들면 성공입니다.</li>
 			</ol>
 
-			<table id="field">
-				<tbody></tbody>
-			</table>
+			<table id="field"></table>
 
 			<div id="score">0</div>
 		</main>
 
 		<script>
-			const $field = document.querySelector("#field tbody");
+			const $field = document.querySelector("#field");
 
 			const fieldData = [];
+			let startPos = [];
 
 			function gameStart() {
 				setFieldData();
@@ -175,7 +174,7 @@
 				$field.append($fragment);
 			}
 
-			function handleKeyDown(e) {
+			function handleKeyUp(e) {
 				e.preventDefault();
 
 				const code = e.keyCode;
@@ -191,6 +190,21 @@
 				}
 
 				drawNew2onField();
+			}
+
+			function handleMouseUp(e) {
+				const endPos = [e.clientX, e.clientY];
+				const diffX = endPos[0] - startPos[0];
+				const diffY = endPos[1] - startPos[1];
+				if (diffX < 0 && Math.abs(diffX) > Math.abs(diffY)) {
+					console.log("왼");
+				} else if (diffX > 0 && Math.abs(diffX) > Math.abs(diffY)) {
+					console.log("오");
+				} else if (diffY > 0 && Math.abs(diffX) <= Math.abs(diffY)) {
+					console.log("아");
+				} else if (diffY < 0 && Math.abs(diffX) <= Math.abs(diffY)) {
+					console.log("위");
+				}
 			}
 
 			function drawNew2onField() {
@@ -223,7 +237,11 @@
 				gameStart();
 			};
 
-			window.addEventListener("keydown", handleKeyDown);
+			window.addEventListener("keyup", handleKeyUp);
+			window.addEventListener("mousedown", (e) => {
+				startPos = [e.clientX, e.clientY];
+			});
+			window.addEventListener("mouseup", handleMouseUp);
 		</script>
 	</body>
 </html>
