@@ -50,6 +50,7 @@
 				line-height: 3;
 				text-align: center;
 				width: calc(100% / 4);
+				height: 22vw;
 				cursor: pointer;
 				border: 10px solid #bbada0;
 			}
@@ -131,5 +132,98 @@
 
 			<div id="score">0</div>
 		</main>
+
+		<script>
+			const $field = document.querySelector("#field tbody");
+
+			const fieldData = [];
+
+			function gameStart() {
+				setFieldData();
+				updateField();
+			}
+
+			function setFieldData() {
+				for (let i = 0; i < 4; i++) {
+					const rowData = [];
+					fieldData.push(rowData);
+
+					for (let j = 0; j < 4; j++) {
+						rowData.push(0);
+					}
+				}
+			}
+
+			function updateField() {
+				const $fragment = document.createDocumentFragment();
+				$field.innerHTML = "";
+
+				fieldData.forEach((tr, i) => {
+					const $tr = document.createElement("tr");
+
+					tr.forEach((td, j) => {
+						const $td = document.createElement("td");
+
+						if (fieldData[i][j] > 0) {
+							$td.textContent = fieldData[i][j];
+							$td.className = `color-${fieldData[i][j]}`;
+						}
+						$tr.append($td);
+					});
+					$fragment.append($tr);
+				});
+				$field.append($fragment);
+			}
+
+			function handleKeyDown(e) {
+				e.preventDefault();
+
+				const code = e.keyCode;
+
+				if (code === 40) {
+					// 아래
+				} else if (code === 38) {
+					// 위
+				} else if (code === 37) {
+					// 왼쪽
+				} else if (code === 39) {
+					// 오른쪽
+				}
+
+				drawNew2onField();
+			}
+
+			function drawNew2onField() {
+				const emptyPos = getEmptyPos();
+				const randomNum = Math.floor(Math.random() * emptyPos.length);
+
+				const row = emptyPos[randomNum][0];
+				const cell = emptyPos[randomNum][1];
+
+				fieldData[row][cell] = 2;
+
+				updateField();
+			}
+
+			function getEmptyPos() {
+				const empty = [];
+
+				fieldData.forEach((tr, i) => {
+					tr.forEach((td, j) => {
+						if (td === 0) {
+							empty.push([i, j]);
+						}
+					});
+				});
+
+				return empty;
+			}
+
+			window.onload = () => {
+				gameStart();
+			};
+
+			window.addEventListener("keydown", handleKeyDown);
+		</script>
 	</body>
 </html>
