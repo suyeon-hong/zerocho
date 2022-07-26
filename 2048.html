@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>2048</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+
+			main {
+				margin: 0 auto;
+				max-width: 1280px;
+				padding: 30px;
+			}
+
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+
+			.noti {
+				padding-left: 20px;
+				font-size: 13px;
+				color: #666;
+				line-height: 1.2;
+				margin-bottom: 30px;
+			}
+
+			#score {
+				user-select: none;
+			}
+
+			#field {
+				width: 100%;
+				max-width: 60vw;
+				border-collapse: collapse;
+				user-select: none;
+				cursor: pointer;
+			}
+
+			#field td {
+				border: 1px solid #222;
+				font-size: 5vw;
+				font-weight: bold;
+				line-height: 3;
+				text-align: center;
+				width: calc(100% / 4);
+				height: 22.4vw;
+				border: 10px solid #bbada0;
+			}
+
+			.color-2 {
+				background-color: #eee4da;
+				color: #776e65;
+			}
+			.color-4 {
+				background-color: #eee1c9;
+				color: #776e65;
+			}
+			.color-8 {
+				background-color: #f3b27a;
+				color: "white";
+			}
+			.color-16 {
+				background-color: #f69664;
+				color: "white";
+			}
+			.color-32 {
+				background-color: #f77c5f;
+				color: "white";
+			}
+			.color-64 {
+				background-color: #f75f3b;
+				color: "white";
+			}
+			.color-128 {
+				background-color: #edd073;
+				color: #776e65;
+			}
+			.color-256 {
+				background-color: #edcc62;
+				color: #776e65;
+			}
+			.color-512 {
+				background-color: #edc950;
+				color: #776e65;
+			}
+			.color-1024 {
+				background-color: #edc53f;
+				color: #776e65;
+			}
+			.color-2048 {
+				background-color: #edc22e;
+				color: #776e65;
+			}
+
+			@media screen and (max-width: 768px) {
+				#field {
+					max-width: 100%;
+				}
+				#field td {
+					font-size: 7vw;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>2048</h1>
+
+			<ol class="noti">
+				<li>
+					키보드 방향키 혹은 마우스 드래그를 이용해 게임을 진행할 수 있습니다.
+				</li>
+				<li>방향키 혹은 드래그방향으로 노출된 숫자들이 모두 이동합니다.</li>
+				<li>
+					숫자가 이동되면서 겹쳐지는 숫자가 있을경우 칸이 합쳐지며 값은 배수가
+					됩니다.
+				</li>
+				<li>숫자를 이동시켜 2048을 만들면 성공입니다.</li>
+			</ol>
+
+			<table id="field"></table>
+		</main>
+
+		<script>
+			const $field = document.querySelector("#field");
+
+			const fieldData = [];
+			let startPos = [];
+
+			function gameStart() {
+				setFieldData();
+				updateField();
+			}
+
+			function setFieldData() {
+				for (let i = 0; i < 4; i++) {
+					const rowData = [];
+					fieldData.push(rowData);
+
+					for (let j = 0; j < 4; j++) {
+						rowData.push(0);
+					}
+				}
+			}
+
+			function updateField() {
+				const $fragment = document.createDocumentFragment();
+				$field.innerHTML = "";
+
+				fieldData.forEach((tr, i) => {
+					const $tr = document.createElement("tr");
+
+					tr.forEach((td, j) => {
+						const $td = document.createElement("td");
+
+						if (fieldData[i][j] > 0) {
+							$td.textContent = fieldData[i][j];
+							$td.className = `color-${fieldData[i][j]}`;
+						}
+						$tr.append($td);
+					});
+					$fragment.append($tr);
+				});
+				$field.append($fragment);
+			}
+
+			const handleKeyUp = (e) => {
+				e.preventDefault();
+
+				const key = e.key;
+
+				if (key === "ArrowDown") {
+					moveCellsTo("down");
+				} else if (key === "ArrowUp") {
+					moveCellsTo("up");
+				} else if (key === "ArrowLeft") {
+					moveCellsTo("left");
+				} else if (key === "ArrowRight") {
+					moveCellsTo("right");
+				}
+			};
+
+			const handleMouseUp = (e) => {
+				const endPos = [e.clientX, e.clientY];
+				const diffX = endPos[0] - startPos[0];
+				const diffY = endPos[1] - startPos[1];
+				if (diffX < 0 && Math.abs(diffX) > Math.abs(diffY)) {
+					moveCellsTo("left");
+				} else if (diffX > 0 && Math.abs(diffX) > Math.abs(diffY)) {
+					moveCellsTo("right");
+				} else if (diffY > 0 && Math.abs(diffX) <= Math.abs(diffY)) {
+					moveCellsTo("down");
+				} else if (diffY < 0 && Math.abs(diffX) <= Math.abs(diffY)) {
+					moveCellsTo("up");
+				}
+			};
+
+			function moveCellsTo(direction) {
+				switch (direction) {
+					case "left": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (cellData) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === cellData) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(cellData);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[i][j] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+
+						break;
+					}
+					case "right": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (rowData[3 - j]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === rowData[3 - j]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(rowData[3 - j]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[i][3 - j] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+					case "up": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (fieldData[j][i]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === fieldData[j][i]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(fieldData[j][i]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[j][i] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+					case "down": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (fieldData[3 - j][i]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === fieldData[3 - j][i]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(fieldData[3 - j][i]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[3 - j][i] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+				}
+
+				if (fieldData.flat().includes(2048)) {
+					updateField();
+					setTimeout(() => {
+						alert("축하합니다. 2048을 만들어 게임을 성공했습니다.");
+						window.removeEventListener("keyup", handleKeyUp);
+						window.removeEventListener("mouseup", handleMouseUp);
+					}, 0);
+				} else if (!fieldData.flat().includes(0)) {
+					alert("더 이상 새로운 숫자가 추가될 칸이 없습니다.");
+				} else {
+					updateField();
+					drawNew2onField();
+				}
+			}
+
+			function drawNew2onField() {
+				const emptyPos = getEmptyPos();
+				const randomNum = Math.floor(Math.random() * emptyPos.length);
+
+				const row = emptyPos[randomNum][0];
+				const cell = emptyPos[randomNum][1];
+
+				fieldData[row][cell] = 2;
+
+				updateField();
+			}
+
+			function getEmptyPos() {
+				const empty = [];
+
+				fieldData.forEach((tr, i) => {
+					tr.forEach((td, j) => {
+						if (td === 0) {
+							empty.push([i, j]);
+						}
+					});
+				});
+
+				return empty;
+			}
+
+			window.onload = () => {
+				gameStart();
+			};
+
+			window.addEventListener("keyup", handleKeyUp);
+			window.addEventListener("mousedown", (e) => {
+				startPos = [e.clientX, e.clientY];
+			});
+			window.addEventListener("mouseup", handleMouseUp);
+		</script>
+	</body>
+</html>
