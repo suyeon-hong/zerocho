@@ -127,18 +127,22 @@
 			</ol>
 
 			<table id="field"></table>
-
-			<div id="score">0</div>
 		</main>
 
 		<script>
 			const $field = document.querySelector("#field");
 
-			const fieldData = [];
+			// const fieldData = [];
+			let fieldData = [
+				[0, 0, 0, 8],
+				[2, 2, 0, 0],
+				[2, 16, 0, 128],
+				[2, 4, 0, 8],
+			];
 			let startPos = [];
 
 			function gameStart() {
-				setFieldData();
+				// setFieldData();
 				updateField();
 			}
 
@@ -177,19 +181,17 @@
 			function handleKeyUp(e) {
 				e.preventDefault();
 
-				const code = e.keyCode;
+				const key = e.key;
 
-				if (code === 40) {
-					// 아래
-				} else if (code === 38) {
-					// 위
-				} else if (code === 37) {
-					// 왼쪽
-				} else if (code === 39) {
-					// 오른쪽
+				if (key === "ArrowDown") {
+					moveCellsTo("down");
+				} else if (key === "ArrowUp") {
+					moveCellsTo("up");
+				} else if (key === "ArrowLeft") {
+					moveCellsTo("left");
+				} else if (key === "ArrowRight") {
+					moveCellsTo("right");
 				}
-
-				drawNew2onField();
 			}
 
 			function handleMouseUp(e) {
@@ -197,14 +199,123 @@
 				const diffX = endPos[0] - startPos[0];
 				const diffY = endPos[1] - startPos[1];
 				if (diffX < 0 && Math.abs(diffX) > Math.abs(diffY)) {
-					console.log("왼");
+					moveCellsTo("left");
 				} else if (diffX > 0 && Math.abs(diffX) > Math.abs(diffY)) {
-					console.log("오");
+					moveCellsTo("right");
 				} else if (diffY > 0 && Math.abs(diffX) <= Math.abs(diffY)) {
-					console.log("아");
+					moveCellsTo("down");
 				} else if (diffY < 0 && Math.abs(diffX) <= Math.abs(diffY)) {
-					console.log("위");
+					moveCellsTo("up");
 				}
+			}
+
+			function moveCellsTo(direction) {
+				switch (direction) {
+					case "left": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (cellData) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === cellData) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(cellData);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[i][j] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+
+						break;
+					}
+					case "right": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (rowData[3 - j]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === rowData[3 - j]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(rowData[3 - j]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[i][3 - j] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+					case "up": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (fieldData[j][i]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === fieldData[j][i]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(fieldData[j][i]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[j][i] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+					case "down": {
+						const movedData = [[], [], [], []];
+
+						fieldData.forEach((rowData, i) => {
+							rowData.forEach((cellData, j) => {
+								if (fieldData[3 - j][i]) {
+									const currenRow = movedData[i];
+									const prevData = currenRow[currenRow.length - 1];
+
+									if (prevData === fieldData[3 - j][i]) {
+										currenRow[currenRow.length - 1] *= -2;
+									} else {
+										movedData[i].push(fieldData[3 - j][i]);
+									}
+								}
+							});
+						});
+
+						[1, 2, 3, 4].forEach((rowData, i) => {
+							[1, 2, 3, 4].forEach((cellData, j) => {
+								fieldData[3 - j][i] = Math.abs(movedData[i][j]) || 0;
+							});
+						});
+						break;
+					}
+				}
+
+				updateField();
+				drawNew2onField();
 			}
 
 			function drawNew2onField() {
