@@ -123,7 +123,7 @@
 					숫자가 이동되면서 겹쳐지는 숫자가 있을경우 칸이 합쳐지며 값은 배수가
 					됩니다.
 				</li>
-				<li>게임을 진행하며 칸이 다 채워지기 전, 2048을 만들면 성공입니다.</li>
+				<li>숫자를 이동시켜 2048을 만들면 성공입니다.</li>
 			</ol>
 
 			<table id="field"></table>
@@ -132,17 +132,11 @@
 		<script>
 			const $field = document.querySelector("#field");
 
-			// const fieldData = [];
-			let fieldData = [
-				[0, 0, 0, 8],
-				[2, 2, 0, 0],
-				[2, 16, 0, 128],
-				[2, 4, 0, 8],
-			];
+			const fieldData = [];
 			let startPos = [];
 
 			function gameStart() {
-				// setFieldData();
+				setFieldData();
 				updateField();
 			}
 
@@ -178,7 +172,7 @@
 				$field.append($fragment);
 			}
 
-			function handleKeyUp(e) {
+			const handleKeyUp = (e) => {
 				e.preventDefault();
 
 				const key = e.key;
@@ -192,9 +186,9 @@
 				} else if (key === "ArrowRight") {
 					moveCellsTo("right");
 				}
-			}
+			};
 
-			function handleMouseUp(e) {
+			const handleMouseUp = (e) => {
 				const endPos = [e.clientX, e.clientY];
 				const diffX = endPos[0] - startPos[0];
 				const diffY = endPos[1] - startPos[1];
@@ -207,7 +201,7 @@
 				} else if (diffY < 0 && Math.abs(diffX) <= Math.abs(diffY)) {
 					moveCellsTo("up");
 				}
-			}
+			};
 
 			function moveCellsTo(direction) {
 				switch (direction) {
@@ -314,8 +308,19 @@
 					}
 				}
 
-				updateField();
-				drawNew2onField();
+				if (fieldData.flat().includes(2048)) {
+					updateField();
+					setTimeout(() => {
+						alert("축하합니다. 2048을 만들어 게임을 성공했습니다.");
+						window.removeEventListener("keyup", handleKeyUp);
+						window.removeEventListener("mouseup", handleMouseUp);
+					}, 0);
+				} else if (!fieldData.flat().includes(0)) {
+					alert("더 이상 새로운 숫자가 추가될 칸이 없습니다.");
+				} else {
+					updateField();
+					drawNew2onField();
+				}
 			}
 
 			function drawNew2onField() {
