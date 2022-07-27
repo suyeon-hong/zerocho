@@ -22,6 +22,37 @@
 				padding: 30px;
 			}
 
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+			.noti {
+				padding-left: 20px;
+				margin-bottom: 20px;
+				font-size: 13px;
+				line-height: 1.2;
+				color: #666;
+			}
+
+			.game_info {
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				gap: 10px;
+				font-size: 18px;
+				font-weight: bold;
+				margin-bottom: 30px;
+			}
+			.game_info span {
+				display: inline-block;
+				min-width: 20px;
+			}
+			.game_info button {
+				font-size: 16px;
+				padding: 5px 10px;
+				cursor: pointer;
+			}
+
 			table {
 				width: 100%;
 			}
@@ -74,6 +105,9 @@
 				animation: popUp 0.4s forwards ease-in;
 				filter: invert(1);
 			}
+			table td.hidden .img_wrap {
+				animation: popDown 0.4s forwards ease-in;
+			}
 
 			@keyframes popUp {
 				0% {
@@ -85,16 +119,40 @@
 					transform: translateY(0);
 				}
 			}
+
+			@keyframes popDown {
+				0% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+				100% {
+					opacity: 0;
+					transform: translateY(110px);
+				}
+			}
 		</style>
 	</head>
 	<body>
 		<main>
 			<h1>두더지잡기</h1>
 
-			<table>
+			<ol class="noti">
+				<li>게임시작 버튼을 눌러 게임을 시작해주세요.</li>
+				<li>두더지를 클릭하면 스코어가 올라갑니다.</li>
+				<li>폭탄을 클릭하면 일정시간 클릭이 제한됩니다.</li>
+				<li>제한시간 안에 두더지를 많이 잡아주세요.</li>
+			</ol>
+
+			<div class="game_info">
+				<div class="score">점수: <span id="score">0</span></div>
+				<div class="time">남은시간: <span id="time">0</span></div>
+				<button id="btnStart">게임시작</button>
+			</div>
+
+			<table id="field">
 				<tbody>
 					<tr>
-						<td class="bomb">
+						<td>
 							<div class="img_wrap"></div>
 						</td>
 						<td>
@@ -105,13 +163,13 @@
 						</td>
 					</tr>
 					<tr>
-						<td class="mole">
+						<td>
 							<div class="img_wrap"></div>
 						</td>
 						<td>
 							<div class="img_wrap"></div>
 						</td>
-						<td class="kill">
+						<td>
 							<div class="img_wrap"></div>
 						</td>
 					</tr>
@@ -129,5 +187,53 @@
 				</tbody>
 			</table>
 		</main>
+
+		<script>
+			const $btnStart = document.querySelector("#btnStart");
+			const $gameField = document.querySelector("#field");
+			const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+			function gameStart() {
+				setInterval(() => {
+					addMoleOrBomb();
+				}, 1000);
+			}
+
+			function addMoleOrBomb() {
+				const tds = $gameField.querySelectorAll("td");
+
+				holes.forEach((hole, idx) => {
+					if (hole) return;
+
+					const bombPer = 0.2;
+					const molePer = 0.5;
+					const num = Math.random();
+
+					if (num < bombPer) {
+						tds[idx].classList.add("bomb");
+						holes[idx] = setTimeout(() => {
+							tds[idx].classList.add("hidden");
+							setTimeout(() => {
+								tds[idx].classList.remove("bomb");
+								tds[idx].classList.remove("hidden");
+								holes[idx] = 0;
+							}, 1000);
+						}, 1000);
+					} else if (num < molePer) {
+						tds[idx].classList.add("mole");
+						holes[idx] = setTimeout(() => {
+							tds[idx].classList.add("hidden");
+							setTimeout(() => {
+								tds[idx].classList.remove("mole");
+								tds[idx].classList.remove("hidden");
+								holes[idx] = 0;
+							}, 1000);
+						}, 1000);
+					}
+				});
+			}
+
+			$btnStart.addEventListener("click", gameStart);
+		</script>
 	</body>
 </html>
