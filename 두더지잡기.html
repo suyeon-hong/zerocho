@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>두더지잡기</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			img {
+				width: 100%;
+			}
+
+			main {
+				max-width: 1280px;
+				margin: 0 auto;
+				padding: 30px;
+			}
+
+			table {
+				width: 100%;
+			}
+			table tbody {
+				width: 100%;
+			}
+			table tr {
+				width: 100%;
+			}
+			table td {
+				width: calc(100% / 3);
+				height: 15vw;
+				position: relative;
+				overflow: hidden;
+				padding-bottom: 10px;
+			}
+			table td::before {
+				content: "";
+				display: block;
+				position: absolute;
+				left: 5%;
+				bottom: 0;
+				width: 90%;
+				height: 30px;
+				border-radius: 50%;
+				background-color: #222;
+			}
+			table td .img_wrap {
+				width: 100%;
+				height: 100%;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 70% 110%;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				opacity: 0;
+			}
+			table td.mole .img_wrap {
+				background-image: url(./img/mole.png);
+				animation: popUp 0.4s forwards ease-in;
+			}
+			table td.bomb .img_wrap {
+				background-image: url(./img/bomb.png);
+				background-size: 50% 80%;
+				animation: popUp 0.4s forwards ease-in;
+			}
+			table td.kill .img_wrap {
+				background-image: url(./img/mole.png);
+				animation: popUp 0.4s forwards ease-in;
+				filter: invert(1);
+			}
+
+			@keyframes popUp {
+				0% {
+					opacity: 0;
+					transform: translateY(110px);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>두더지잡기</h1>
+
+			<table>
+				<tbody>
+					<tr>
+						<td class="bomb">
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="mole">
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td class="kill">
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</main>
+	</body>
+</html>
