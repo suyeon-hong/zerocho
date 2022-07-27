@@ -192,8 +192,12 @@
 			const $btnStart = document.querySelector("#btnStart");
 			const $gameField = document.querySelector("#field");
 			const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+			let gameStarted = false;
 
 			function gameStart() {
+				if (gameStarted) return;
+
+				gameStarted = true;
 				setInterval(() => {
 					addMoleOrBomb();
 				}, 1000);
