@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>두더지잡기</title>
+
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			img {
+				width: 100%;
+			}
+
+			main {
+				max-width: 1280px;
+				margin: 0 auto;
+				padding: 30px;
+				user-select: none;
+			}
+
+			h1 {
+				font-size: 28px;
+				margin-bottom: 10px;
+			}
+			.noti {
+				padding-left: 20px;
+				margin-bottom: 20px;
+				font-size: 13px;
+				line-height: 1.2;
+				color: #666;
+			}
+
+			.game_info {
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				gap: 10px;
+				font-size: 18px;
+				font-weight: bold;
+				margin-bottom: 30px;
+			}
+			.game_info span {
+				display: inline-block;
+				min-width: 20px;
+			}
+			.game_info button {
+				font-size: 16px;
+				padding: 5px 10px;
+				cursor: pointer;
+			}
+
+			table {
+				width: 100%;
+			}
+			table tbody {
+				width: 100%;
+			}
+			table tr {
+				width: 100%;
+			}
+			table td {
+				width: calc(100% / 3);
+				height: 15vw;
+				position: relative;
+				overflow: hidden;
+				padding-bottom: 10px;
+				cursor: pointer;
+			}
+			table td::before {
+				content: "";
+				display: block;
+				position: absolute;
+				left: 5%;
+				bottom: 0;
+				width: 90%;
+				height: 30px;
+				border-radius: 50%;
+				background-color: #222;
+			}
+			table td .img_wrap {
+				width: 100%;
+				height: 100%;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 70% 110%;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				opacity: 0;
+			}
+			table td.mole .img_wrap {
+				background-image: url(./img/mole.png);
+				animation: popUp 0.4s forwards ease-in;
+			}
+			table td.bomb .img_wrap {
+				background-image: url(./img/bomb.png);
+				background-size: 50% 80%;
+				animation: popUp 0.4s forwards ease-in;
+			}
+			table td.kill .img_wrap {
+				filter: invert(1);
+			}
+			table td.hidden .img_wrap {
+				animation: popDown 0.4s forwards ease-in;
+			}
+
+			@keyframes popUp {
+				0% {
+					opacity: 0;
+					transform: translateY(110px);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			@keyframes popDown {
+				0% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+				100% {
+					opacity: 0;
+					transform: translateY(110px);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>두더지잡기</h1>
+
+			<ol class="noti">
+				<li>게임시작 버튼을 눌러 게임을 시작해주세요.</li>
+				<li>두더지를 클릭하면 스코어가 올라갑니다.</li>
+				<li>폭탄을 클릭하면 2초간 클릭이 제한됩니다.</li>
+				<li>제한시간 안에 두더지를 많이 잡아주세요.</li>
+			</ol>
+
+			<div class="game_info">
+				<div class="score">점수: <span id="score">0</span></div>
+				<div class="time">남은시간: <span id="time">0</span></div>
+				<button id="btnStart">게임시작</button>
+			</div>
+
+			<table id="field">
+				<tbody>
+					<tr>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+						<td>
+							<div class="img_wrap"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</main>
+
+		<script>
+			const $score = document.querySelector("#score");
+			const $time = document.querySelector("#time");
+			const $btnStart = document.querySelector("#btnStart");
+			const $gameField = document.querySelector("#field");
+
+			const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+			let gameStarted = false;
+			let score = 0;
+			let time = 50;
+			let prevTarget;
+			let clickable = true;
+
+			let timeCounter;
+			let intervalTimer;
+
+			function gameStart() {
+				if (gameStarted) return;
+
+				init();
+				gameStarted = true;
+
+				intervalTimer = setInterval(() => {
+					addMoleOrBomb();
+				}, 1000);
+
+				timeCounter = setInterval(() => {
+					time -= 1;
+					$time.textContent = time;
+
+					if (time <= 0) {
+						gameFinish();
+					}
+				}, 1000);
+			}
+
+			function init() {
+				score = 0;
+				time = 50;
+				$score.textContent = score;
+				$time.textContent = time;
+			}
+
+			function gameFinish() {
+				clearInterval(timeCounter);
+				clearInterval(intervalTimer);
+				gameStarted = false;
+
+				setTimeout(() => {
+					alert("게임종료!");
+				}, 0);
+			}
+
+			function addMoleOrBomb() {
+				const tds = $gameField.querySelectorAll("td");
+
+				holes.forEach((hole, idx) => {
+					if (hole) return;
+
+					const bombPer = 0.2;
+					const molePer = 0.5;
+					const num = Math.random();
+
+					if (num < bombPer) {
+						tds[idx].className = "bomb";
+						holes[idx] = setTimeout(() => {
+							tds[idx].classList.add("hidden");
+							setTimeout(() => {
+								tds[idx].className = "";
+								holes[idx] = 0;
+							}, 1000);
+						}, 1000);
+					} else if (num < molePer) {
+						tds[idx].className = "mole";
+						holes[idx] = setTimeout(() => {
+							tds[idx].classList.add("hidden");
+							setTimeout(() => {
+								tds[idx].className = "";
+								holes[idx] = 0;
+							}, 1000);
+						}, 1000);
+					}
+				});
+			}
+
+			function onClick(e) {
+				const target = e.target.closest("td");
+
+				if (!target || prevTarget === target || !clickable) return;
+
+				if (target.classList.contains("mole")) {
+					score += 1;
+					$score.textContent = score;
+					target.classList.add("kill");
+				} else if (target.classList.contains("bomb")) {
+					target.classList.add("kill");
+					clickable = false;
+					setTimeout(() => {
+						clickable = true;
+					}, 2000);
+				}
+				prevTarget = target;
+			}
+
+			$btnStart.addEventListener("click", gameStart);
+			$gameField.addEventListener("click", onClick);
+		</script>
+	</body>
+</html>
