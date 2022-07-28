@@ -20,6 +20,7 @@
 				max-width: 1280px;
 				margin: 0 auto;
 				padding: 30px;
+				user-select: none;
 			}
 
 			h1 {
@@ -68,6 +69,7 @@
 				position: relative;
 				overflow: hidden;
 				padding-bottom: 10px;
+				cursor: pointer;
 			}
 			table td::before {
 				content: "";
@@ -101,8 +103,6 @@
 				animation: popUp 0.4s forwards ease-in;
 			}
 			table td.kill .img_wrap {
-				background-image: url(./img/mole.png);
-				animation: popUp 0.4s forwards ease-in;
 				filter: invert(1);
 			}
 			table td.hidden .img_wrap {
@@ -139,7 +139,7 @@
 			<ol class="noti">
 				<li>게임시작 버튼을 눌러 게임을 시작해주세요.</li>
 				<li>두더지를 클릭하면 스코어가 올라갑니다.</li>
-				<li>폭탄을 클릭하면 일정시간 클릭이 제한됩니다.</li>
+				<li>폭탄을 클릭하면 2초간 클릭이 제한됩니다.</li>
 				<li>제한시간 안에 두더지를 많이 잡아주세요.</li>
 			</ol>
 
@@ -189,18 +189,56 @@
 		</main>
 
 		<script>
+			const $score = document.querySelector("#score");
+			const $time = document.querySelector("#time");
 			const $btnStart = document.querySelector("#btnStart");
 			const $gameField = document.querySelector("#field");
+
 			const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 			let gameStarted = false;
+			let score = 0;
+			let time = 50;
+			let prevTarget;
+			let clickable = true;
+
+			let timeCounter;
+			let intervalTimer;
 
 			function gameStart() {
 				if (gameStarted) return;
 
+				init();
 				gameStarted = true;
-				setInterval(() => {
+
+				intervalTimer = setInterval(() => {
 					addMoleOrBomb();
 				}, 1000);
+
+				timeCounter = setInterval(() => {
+					time -= 1;
+					$time.textContent = time;
+
+					if (time <= 0) {
+						gameFinish();
+					}
+				}, 1000);
+			}
+
+			function init() {
+				score = 0;
+				time = 50;
+				$score.textContent = score;
+				$time.textContent = time;
+			}
+
+			function gameFinish() {
+				clearInterval(timeCounter);
+				clearInterval(intervalTimer);
+				gameStarted = false;
+
+				setTimeout(() => {
+					alert("게임종료!");
+				}, 0);
 			}
 
 			function addMoleOrBomb() {
@@ -214,22 +252,20 @@
 					const num = Math.random();
 
 					if (num < bombPer) {
-						tds[idx].classList.add("bomb");
+						tds[idx].className = "bomb";
 						holes[idx] = setTimeout(() => {
 							tds[idx].classList.add("hidden");
 							setTimeout(() => {
-								tds[idx].classList.remove("bomb");
-								tds[idx].classList.remove("hidden");
+								tds[idx].className = "";
 								holes[idx] = 0;
 							}, 1000);
 						}, 1000);
 					} else if (num < molePer) {
-						tds[idx].classList.add("mole");
+						tds[idx].className = "mole";
 						holes[idx] = setTimeout(() => {
 							tds[idx].classList.add("hidden");
 							setTimeout(() => {
-								tds[idx].classList.remove("mole");
-								tds[idx].classList.remove("hidden");
+								tds[idx].className = "";
 								holes[idx] = 0;
 							}, 1000);
 						}, 1000);
@@ -237,7 +273,27 @@
 				});
 			}
 
+			function onClick(e) {
+				const target = e.target.closest("td");
+
+				if (!target || prevTarget === target || !clickable) return;
+
+				if (target.classList.contains("mole")) {
+					score += 1;
+					$score.textContent = score;
+					target.classList.add("kill");
+				} else if (target.classList.contains("bomb")) {
+					target.classList.add("kill");
+					clickable = false;
+					setTimeout(() => {
+						clickable = true;
+					}, 2000);
+				}
+				prevTarget = target;
+			}
+
 			$btnStart.addEventListener("click", gameStart);
+			$gameField.addEventListener("click", onClick);
 		</script>
 	</body>
 </html>
